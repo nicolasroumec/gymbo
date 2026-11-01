@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev*)",
+      "Bash(npm run check*)",
+      "Bash(npm run lint*)",
+      "Bash(npm run build*)",
+      "Bash(npx vitest run*)",
+      "Bash(npx supabase migration new *)",
+      "Bash(npx supabase gen types *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)"
+    ],
+    "ask": [
+      "Bash(npx supabase db push*)",
+      "Bash(npm install *)",
+      "Bash(npm i *)",
+      "Bash(git push*)"
+    ],
+    "deny": [
+      "Bash(npx supabase db reset*)",
+      "Read(./app/.env)",
+      "Read(./app/.env.local)",
+      "Read(./app/.env.*.local)",
+      "Edit(./app/.env.local)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/proteger-migraciones.mjs\"" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "cd \"$CLAUDE_PROJECT_DIR/app\" && npm run check --silent 1>&2 || exit 2" }
+        ]
+      }
+    ]
+  }
+}

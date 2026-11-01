@@ -1,0 +1,11 @@
+# Datos personales: historial en Excel y exports
+docs/*.xlsx
+*.export.json
+
+# Claude Code: preferencias personales
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
