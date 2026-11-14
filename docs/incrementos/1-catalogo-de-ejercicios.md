@@ -9,7 +9,7 @@ Rama: `feat/exercise-catalog`.
   `MuscleGroupsPage` con ruta y link en Más: alta, renombrar, cambiar bloque, archivar, borrar si no tiene ejercicios, cargar los sugeridos si la lista está vacía.
 - [x] **`feat: add exercise list with search and group filter`**
   `ExercisesPage` con ruta y link en Más: buscador, filtro por grupo, ver archivados.
-- [ ] **`feat: add exercise create and edit form`**
+- [x] **`feat: add exercise create and edit form`**
   `ExerciseFormPage` (nuevo y editar): grupo, equipo, salto de peso, video con minuto, nota fija.
 - [ ] **`feat: archive exercises with history instead of deleting`**
   Borrar solo si no tiene series en `workout_sets`; si tiene, archivar.

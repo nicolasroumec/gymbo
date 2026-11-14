@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
 import { filterExercises } from '../lib/exercises'
@@ -31,6 +32,7 @@ export default function ExercisesPage() {
   return (
     <>
       <h1>{t.exercises}</h1>
+      <Link to="nuevo" className="button">{t.newExercise}</Link>
       {error && <p role="alert" className="error">{t.loadError}</p>}
 
       <div className="filters">
@@ -51,8 +53,10 @@ export default function ExercisesPage() {
       <ul className="list">
         {visible.map((e) => (
           <li key={e.id} className={e.archived ? 'archived' : undefined}>
-            {e.name}
-            <span className="muted">{groupName.get(e.muscle_group_id)}</span>
+            <Link to={e.id}>
+              {e.name}
+              <span className="muted">{groupName.get(e.muscle_group_id)}</span>
+            </Link>
           </li>
         ))}
       </ul>

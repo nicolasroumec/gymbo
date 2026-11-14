@@ -45,13 +45,15 @@ h1 {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
   min-height: 44px;
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   padding: 8px 12px;
   color: inherit;
@@ -67,6 +69,19 @@ button {
   border: 0;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* Link con aspecto de botón (acción principal que navega) */
+a.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-bottom: 16px;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 8px;
+  text-decoration: none;
 }
 
 button:disabled {
@@ -214,11 +229,16 @@ form.rows {
 }
 
 .list li {
+  border-bottom: 1px solid var(--border);
+}
+
+.list a {
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-height: 56px;
-  border-bottom: 1px solid var(--border);
+  color: inherit;
+  text-decoration: none;
 }
 
 .list .muted {
