@@ -181,6 +181,55 @@ form.rows {
   text-decoration: line-through;
 }
 
+.muted {
+  color: var(--muted);
+}
+
+/* Buscador y filtros arriba de una lista */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.check input {
+  width: 24px;
+  min-height: 24px;
+  height: 24px;
+}
+
+/* Lista de solo lectura: nombre y, debajo, un dato secundario */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list li {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 56px;
+  border-bottom: 1px solid var(--border);
+}
+
+.list .muted {
+  font-size: 14px;
+}
+
+.list .archived {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
 /* Login */
 .login {
   max-width: 360px;

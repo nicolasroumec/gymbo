@@ -38,6 +38,12 @@ const es = {
   saveError: 'No se pudo guardar. Probá de nuevo.',
   nameTaken: 'Ya existe uno con ese nombre.',
   inUse: 'Está en uso: archivalo en vez de borrarlo.',
+  exercises: 'Ejercicios',
+  search: 'Buscar',
+  muscleGroup: 'Grupo muscular',
+  allGroups: 'Todos los grupos',
+  showArchived: 'Ver archivados',
+  noExercises: 'No hay ejercicios.',
 }
 
 export type Texts = typeof es
@@ -80,6 +86,12 @@ const en: Texts = {
   saveError: 'Could not save. Try again.',
   nameTaken: 'That name already exists.',
   inUse: 'It is in use: archive it instead of deleting.',
+  exercises: 'Exercises',
+  search: 'Search',
+  muscleGroup: 'Muscle group',
+  allGroups: 'All groups',
+  showArchived: 'Show archived',
+  noExercises: 'No exercises.',
 }
 
 export type Lang = 'es' | 'en'
