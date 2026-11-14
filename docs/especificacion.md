@@ -6,7 +6,7 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 
 | Incremento | Estado |
 | --- | --- |
-| 0. Base | En curso: app con login y pestañas probada en local; falta push y deploy en Vercel |
+| 0. Base | Terminado |
 | 1. Catálogo de ejercicios | Pendiente |
 | 2. Registro de sesiones | Pendiente |
 | 3. Actividades y cuerpo | Pendiente |
@@ -161,9 +161,9 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 16. 👤 **Prueba final.** Entrar desde el celular a la URL de Vercel con tu cuenta, e intentar registrarse con otro email para confirmar que falla.
 
 - [x] Código en GitHub.
-- [ ] Entrás con tu cuenta desde el celular a la URL pública.
-- [ ] El registro de usuarios nuevos está desactivado en Supabase.
-- [ ] README y LICENSE en el repo.
+- [x] Entrás con tu cuenta desde el celular a la URL pública.
+- [x] El registro de usuarios nuevos está desactivado en Supabase.
+- [x] README y LICENSE en el repo.
 
 ### 1. Catálogo de ejercicios
 - `ExercisesPage`: lista con buscador por nombre y filtro por grupo muscular; archivados ocultos con opción de verlos.

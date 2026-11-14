@@ -2,7 +2,7 @@
 
 App personal de entrenamiento para un solo usuario: fuerza (series, peso y reps), actividades, soga, peso corporal y pasos. Se carga desde el celular en el gym y se analiza desde la PC.
 
-**App:** próximamente en Vercel.
+**App:** [app-seven-alpha-11.vercel.app](https://app-seven-alpha-11.vercel.app/) (con login: es de uso personal).
 
 ## Stack
 
