@@ -20,4 +20,4 @@ Trabajá el incremento $ARGUMENTS de `docs/especificacion.md`.
    - Actualizá la tabla Estado y tildá los criterios cumplidos en `docs/especificacion.md`.
    - Si una decisión cambió la especificación, actualizala en el mismo cambio.
    - Explicá en 3 a 5 líneas los conceptos nuevos de React, TypeScript o Supabase que aparecieron.
-   - Proponé un mensaje de commit en español. Commiteá solo si el usuario lo pide.
+   - Proponé un mensaje de commit con Conventional Commits en inglés (`feat: ...`). No commitees: los commits los hace el usuario.

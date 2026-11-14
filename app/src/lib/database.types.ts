@@ -176,7 +176,7 @@ export type Database = {
           created_at: string
           equipment: string | null
           id: string
-          muscle_group: string | null
+          muscle_group_id: string
           name: string
           notes: string | null
           user_id: string
@@ -189,7 +189,7 @@ export type Database = {
           created_at?: string
           equipment?: string | null
           id?: string
-          muscle_group?: string | null
+          muscle_group_id: string
           name: string
           notes?: string | null
           user_id?: string
@@ -202,13 +202,48 @@ export type Database = {
           created_at?: string
           equipment?: string | null
           id?: string
-          muscle_group?: string | null
+          muscle_group_id?: string
           name?: string
           notes?: string | null
           user_id?: string
           video_start_s?: number | null
           video_url?: string | null
           weight_step?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_muscle_group_id_user_id_fkey"
+            columns: ["muscle_group_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "muscle_groups"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      muscle_groups: {
+        Row: {
+          archived: boolean
+          block: string
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean
+          block?: string
+          created_at?: string
+          id?: string
+          name: string
+          user_id?: string
+        }
+        Update: {
+          archived?: boolean
+          block?: string
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
         }
         Relationships: []
       }
