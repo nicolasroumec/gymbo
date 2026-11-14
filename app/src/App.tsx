@@ -9,6 +9,9 @@ import RegisterPage from './pages/RegisterPage'
 import HistoryPage from './pages/HistoryPage'
 import StatsPage from './pages/StatsPage'
 import MorePage from './pages/MorePage'
+import MuscleGroupsPage from './pages/MuscleGroupsPage'
+import ExercisesPage from './pages/ExercisesPage'
+import ExerciseFormPage from './pages/ExerciseFormPage'
 
 export default function App() {
   // undefined = todavía no sabemos si hay sesión; null = no hay.
@@ -32,6 +35,10 @@ export default function App() {
           <Route path="historial" element={<HistoryPage />} />
           <Route path="estadisticas" element={<StatsPage />} />
           <Route path="mas" element={<MorePage />} />
+          <Route path="mas/grupos" element={<MuscleGroupsPage />} />
+          <Route path="mas/ejercicios" element={<ExercisesPage />} />
+          <Route path="mas/ejercicios/nuevo" element={<ExerciseFormPage />} />
+          <Route path="mas/ejercicios/:id" element={<ExerciseFormPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

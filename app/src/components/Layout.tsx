@@ -18,7 +18,8 @@ export default function Layout() {
       </main>
       <nav className="tabs">
         {tabs.map((tab) => (
-          <NavLink key={tab.to} to={tab.to} end>
+          // end solo en "/": si no, Entrenar quedaría activa en todas las rutas; Más sigue activa en /mas/grupos
+          <NavLink key={tab.to} to={tab.to} end={tab.to === '/'}>
             {t[tab.label]}
           </NavLink>
         ))}

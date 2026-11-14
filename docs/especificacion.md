@@ -7,7 +7,7 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 | Incremento | Estado |
 | --- | --- |
 | 0. Base | Terminado |
-| 1. Catálogo de ejercicios | Pendiente |
+| 1. Catálogo de ejercicios | En curso |
 | 2. Registro de sesiones | Pendiente |
 | 3. Actividades y cuerpo | Pendiente |
 | 4. Importador de Excels | Pendiente |
@@ -64,11 +64,12 @@ Variables de entorno (en `app/.env.local`, ver `app/.env.example`): `VITE_SUPABA
 
 ## Modelo de datos
 
-Nueve tablas y una vista. La unidad mínima es la **serie**: una fila por serie, así las estadísticas salen con SQL y no hay que reinterpretar texto.
+Diez tablas y una vista. La unidad mínima es la **serie**: una fila por serie, así las estadísticas salen con SQL y no hay que reinterpretar texto.
 
 | Tabla | Campos clave | Notas |
 | --- | --- | --- |
-| `exercises` | name, muscle_group, equipment, weight_step, video_url, video_start_s, notes, archived | Catálogo. Nombre único por usuario. Se archiva en vez de borrar si tiene historial. `notes` = nota fija que se ve cada vez que se carga ("asiento en 4"). `weight_step` = salto de peso propio; vacío = el del equipo (2,5 kg barra y mancuerna, 5 kg máquina) |
+| `muscle_groups` | name, block, archived | Lista editable de grupos musculares. Nombre único por usuario. `block` = `push`, `pull`, `legs`, `core` u `other`, para el balance empuje / tirón / piernas. Con ejercicios no se borra (`on delete restrict`): se archiva |
+| `exercises` | name, muscle_group_id, equipment, weight_step, video_url, video_start_s, notes, archived | Catálogo. Nombre único por usuario. Se archiva en vez de borrar si tiene historial. `notes` = nota fija que se ve cada vez que se carga ("asiento en 4"). `weight_step` = salto de peso propio; vacío = el del equipo (2,5 kg barra y mancuerna, 5 kg máquina) |
 | `routines` | name, position, active, notes | Una rutina del plan (EMPUJE, TORSO A). `position` = orden del ciclo |
 | `routine_exercises` | routine_id, exercise_id, position, target_sets, rep_min, rep_max, default_set_type, rest_s, superset_group | Receta de cada rutina. El rango de reps alimenta la progresión |
 | `workouts` | date, routine_id (opcional), notes | Una sesión real. Sin rutina = sesión libre |
@@ -127,6 +128,8 @@ Ida y vuelta obligatoria: `format(parse(x))` devuelve la forma canónica de `x` 
 
 Cada incremento termina publicado y usable desde el celular. Se trabaja uno a la vez (`/incremento N`): al empezar se revisa este plan y se ajusta. Al cerrar uno: tildar sus criterios y actualizar la tabla **Estado**.
 
+**Commits:** cada incremento tiene su plan de commits en `docs/incrementos/N-*.md`, en una rama propia que se mergea a `main` al cerrar. Cada commit deja `npm run check` en verde y la app funcionando. El orden va de lógica pura con tests a pantallas, y termina con `docs: close increment N`.
+
 Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`. Navegación inferior fija: **Entrenar · Registrar · Historial · Estadísticas · Más** (Más = ejercicios, actividades, rutinas, importar, exportar, salir).
 
 ### 0. Base
@@ -166,10 +169,15 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - [x] README y LICENSE en el repo.
 
 ### 1. Catálogo de ejercicios
-- `ExercisesPage`: lista con buscador por nombre y filtro por grupo muscular; archivados ocultos con opción de verlos.
-- `ExerciseFormPage`: alta y edición con grupo muscular, equipo, salto de peso (opcional), link al video con minuto y nota fija.
+- Migración `muscle_groups`: grupos musculares editables; `exercises.muscle_group` (texto) pasa a `muscle_group_id`.
+- `MuscleGroupsPage` (en Más): alta, renombrar, cambiar bloque, archivar; borrar solo si no tiene ejercicios. Si la lista está vacía, ofrece cargar los sugeridos en el idioma actual: Pecho, Hombros, Tríceps (empuje); Espalda, Bíceps, Antebrazos (tirón); Cuádriceps, Isquiotibiales, Glúteos, Gemelos (piernas); Abdominales (core); Otro.
+- `ExercisesPage`: lista con buscador por nombre (sin distinguir mayúsculas ni tildes) y filtro por grupo muscular; archivados ocultos con opción de verlos.
+- `ExerciseFormPage`: alta y edición con grupo muscular, equipo, salto de peso (opcional), link al video con minuto (`m:ss`) y nota fija.
 - Archivar en vez de borrar si tiene series; borrar solo si no tiene.
-- `lib/video.ts`: arma el link de YouTube con el minuto (`?t=`). Test.- [ ] Están cargados los ejercicios de la rutina actual.
+- `lib/video.ts`: arma el link de YouTube con el minuto (`?t=`) y descarta links que no sean `http(s)`. Test.
+- `lib/numbers.ts`: lectura de decimales con coma o punto, compartida por todos los formularios. Test.
+- `lib/exercises.ts`: búsqueda y filtro del catálogo. Test.
+- [ ] Están cargados los ejercicios de la rutina actual.
 
 ### 2. Registro de sesiones
 - `lib/sets.ts`: `parse` y `format` de la notación, con la tabla de ejemplos como tests e ida y vuelta.
@@ -185,7 +193,6 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - `ActivityTypesPage` (en Más): alta, edición y archivo de tipos, eligiendo qué campos pide cada uno. Si la lista está vacía, ofrece cargar Fútbol, Pádel, HIIT, Bici, Movilidad, Running y Soga.
 - `RegisterPage` (pestaña Registrar): cargar la actividad del día con los campos de su tipo; peso corporal; pasos.
 - Soga: rondas, segundos de salto y de descanso; muestra el tiempo total calculado.
-- `lib/numbers.ts`: lectura de decimales con coma o punto, compartida por todos los formularios. Test.
 - [ ] Una semana completa (gym, fútbol, soga, peso) registrada solo en la app.
 
 ### 4. Importador de Excels
@@ -229,7 +236,7 @@ Todas las métricas salen de `workout_sets`, sin series de calentamiento (`warmu
 | Peso máximo | Mayor `weight_kg` de la sesión | Gráfico por ejercicio |
 | 1RM estimado | Epley: `w × (1 + r/30)`, solo series de hasta 12 reps | Gráfico por ejercicio, récords |
 | Volumen | Suma de reps × kg | Gráfico por ejercicio, volumen semanal por grupo |
-| Series por grupo | Series por semana por `muscle_group` | Balance empuje / tirón / piernas |
+| Series por grupo | Series por semana por grupo muscular (`muscle_group_id`) y por `block` | Balance empuje / tirón / piernas |
 | Récords | Mejor peso, mejor 1RM, más reps con un mismo peso | Lista, aviso al guardar |
 | Frecuencia | Sesiones y actividades por mes y tipo | Tabla mensual (como la hoja "Total") |
 | Soga | Rondas y tiempo de salto por sesión (saltos y mejor tanda si están) | Gráfico de soga |

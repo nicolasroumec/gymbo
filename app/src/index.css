@@ -45,13 +45,15 @@ h1 {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
   min-height: 44px;
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   padding: 8px 12px;
   color: inherit;
@@ -67,6 +69,19 @@ button {
   border: 0;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* Link con aspecto de botón (acción principal que navega) */
+a.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-bottom: 16px;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 8px;
+  text-decoration: none;
 }
 
 button:disabled {
@@ -117,6 +132,122 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* Error de la pantalla: queda fijo arriba para verlo aunque estés al final de una lista larga */
+main > .error {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 0;
+  background: var(--bg);
+}
+
+button.secondary {
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* Links de Más a cada pantalla */
+.menu {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.menu a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Filas editables: nombre arriba a lo ancho, controles abajo (entra en 360 px) */
+.rows {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rows li,
+form.rows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rows input {
+  flex: 1 1 100%;
+}
+
+.rows select {
+  flex: 1;
+  width: auto;
+}
+
+.rows .archived input {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Buscador y filtros arriba de una lista */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.check input {
+  width: 24px;
+  min-height: 24px;
+  height: 24px;
+}
+
+/* Lista de solo lectura: nombre y, debajo, un dato secundario */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list li {
+  border-bottom: 1px solid var(--border);
+}
+
+.list a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 56px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.list .muted {
+  font-size: 14px;
+}
+
+.list .archived {
+  color: var(--muted);
+  text-decoration: line-through;
 }
 
 /* Login */
