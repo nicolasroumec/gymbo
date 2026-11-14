@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n, type Lang } from '../lib/i18n'
 import { applyTheme, loadTheme, type Theme } from '../lib/theme'
@@ -22,6 +23,9 @@ export default function MorePage() {
   return (
     <>
       <h1>{t.more}</h1>
+      <nav className="menu">
+        <Link to="/mas/grupos">{t.muscleGroups}</Link>
+      </nav>
       <div className="settings">
         <label>
           {t.language}

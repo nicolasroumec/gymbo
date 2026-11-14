@@ -5,7 +5,7 @@ Rama: `feat/exercise-catalog`.
 
 - [x] **`feat: add editable muscle groups and catalog domain logic`**
   Migración `muscle_groups`, tipos regenerados, `lib/video.ts`, `lib/numbers.ts`, `lib/exercises.ts`, `lib/muscleGroups.ts` con sus tests.
-- [ ] **`feat: add muscle groups page`**
+- [x] **`feat: add muscle groups page`**
   `MuscleGroupsPage` con ruta y link en Más: alta, renombrar, cambiar bloque, archivar, borrar si no tiene ejercicios, cargar los sugeridos si la lista está vacía.
 - [ ] **`feat: add exercise list with search and group filter`**
   `ExercisesPage` con ruta y link en Más: buscador, filtro por grupo, ver archivados.

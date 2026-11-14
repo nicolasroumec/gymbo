@@ -119,6 +119,68 @@ button:disabled {
   gap: 4px;
 }
 
+/* Error de la pantalla: queda fijo arriba para verlo aunque estés al final de una lista larga */
+main > .error {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 0;
+  background: var(--bg);
+}
+
+button.secondary {
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* Links de Más a cada pantalla */
+.menu {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.menu a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Filas editables: nombre arriba a lo ancho, controles abajo (entra en 360 px) */
+.rows {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rows li,
+form.rows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rows input {
+  flex: 1 1 100%;
+}
+
+.rows select {
+  flex: 1;
+  width: auto;
+}
+
+.rows .archived input {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
 /* Login */
 .login {
   max-width: 360px;
