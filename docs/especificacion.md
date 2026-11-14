@@ -128,6 +128,8 @@ Ida y vuelta obligatoria: `format(parse(x))` devuelve la forma canónica de `x` 
 
 Cada incremento termina publicado y usable desde el celular. Se trabaja uno a la vez (`/incremento N`): al empezar se revisa este plan y se ajusta. Al cerrar uno: tildar sus criterios y actualizar la tabla **Estado**.
 
+**Commits:** cada incremento tiene su plan de commits en `docs/incrementos/N-*.md`, en una rama propia que se mergea a `main` al cerrar. Cada commit deja `npm run check` en verde y la app funcionando. El orden va de lógica pura con tests a pantallas, y termina con `docs: close increment N`.
+
 Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`. Navegación inferior fija: **Entrenar · Registrar · Historial · Estadísticas · Más** (Más = ejercicios, actividades, rutinas, importar, exportar, salir).
 
 ### 0. Base
