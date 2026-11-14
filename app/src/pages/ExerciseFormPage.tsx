@@ -26,6 +26,7 @@ export default function ExerciseFormPage() {
   const [loaded, setLoaded] = useState(!id)
   const [error, setError] = useState<keyof Texts | null>(null)
   const [saving, setSaving] = useState(false)
+  const [archived, setArchived] = useState(false)
 
   useEffect(() => {
     supabase
@@ -50,6 +51,7 @@ export default function ExerciseFormPage() {
           videoStart: data.video_start_s === null ? '' : formatTimestamp(data.video_start_s),
           notes: data.notes ?? '',
         })
+        setArchived(data.archived)
         setLoaded(true)
       })
   }, [id])
@@ -70,6 +72,20 @@ export default function ExerciseFormPage() {
     const { error } = await query
     setSaving(false)
     // Si falla, el formulario queda como está para reintentar.
+    if (error) return setError(dbErrorKey(error))
+    navigate('/mas/ejercicios')
+  }
+
+  // Borrar con historial lo rechaza la base (on delete restrict) y dbErrorKey avisa que se archive.
+  async function remove() {
+    if (!confirm(t.confirmDelete)) return
+    const { error } = await supabase.from('exercises').delete().eq('id', id!)
+    if (error) return setError(dbErrorKey(error))
+    navigate('/mas/ejercicios')
+  }
+
+  async function toggleArchived() {
+    const { error } = await supabase.from('exercises').update({ archived: !archived }).eq('id', id!)
     if (error) return setError(dbErrorKey(error))
     navigate('/mas/ejercicios')
   }
@@ -131,6 +147,14 @@ export default function ExerciseFormPage() {
             <textarea name="notes" rows={2} value={form.notes} onChange={set} />
           </label>
           <button type="submit" disabled={saving}>{t.save}</button>
+          {id && (
+            <>
+              <button type="button" className="secondary" onClick={toggleArchived}>
+                {archived ? t.unarchive : t.archive}
+              </button>
+              <button type="button" className="secondary" onClick={remove}>{t.delete}</button>
+            </>
+          )}
         </form>
       )}
     </>

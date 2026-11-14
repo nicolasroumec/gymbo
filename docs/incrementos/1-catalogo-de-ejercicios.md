@@ -11,7 +11,7 @@ Rama: `feat/exercise-catalog`.
   `ExercisesPage` con ruta y link en Más: buscador, filtro por grupo, ver archivados.
 - [x] **`feat: add exercise create and edit form`**
   `ExerciseFormPage` (nuevo y editar): grupo, equipo, salto de peso, video con minuto, nota fija.
-- [ ] **`feat: archive exercises with history instead of deleting`**
+- [x] **`feat: archive exercises with history instead of deleting`**
   Borrar solo si no tiene series en `workout_sets`; si tiene, archivar.
 - [ ] **`docs: close increment 1`**
   Tildar el criterio y actualizar la tabla Estado.

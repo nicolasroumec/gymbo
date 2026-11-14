@@ -64,6 +64,7 @@ const es = {
   invalidWeightStep: 'El salto de peso tiene que ser un número mayor a 0.',
   invalidTime: 'El minuto va como m:ss, por ejemplo 1:30.',
   invalidLink: 'El link tiene que empezar con http:// o https://.',
+  confirmDelete: '¿Borrar este ejercicio? No se puede deshacer.',
 }
 
 export type Texts = typeof es
@@ -132,6 +133,7 @@ const en: Texts = {
   invalidWeightStep: 'Weight step must be a number greater than 0.',
   invalidTime: 'Start time goes as m:ss, for example 1:30.',
   invalidLink: 'The link must start with http:// or https://.',
+  confirmDelete: 'Delete this exercise? This cannot be undone.',
 }
 
 export type Lang = 'es' | 'en'
