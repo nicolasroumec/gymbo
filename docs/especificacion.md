@@ -6,7 +6,7 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 
 | Incremento | Estado |
 | --- | --- |
-| 0. Base | En curso: proyecto Vite creado en `app/` |
+| 0. Base | En curso: app con login y pestañas probada en local; falta push y deploy en Vercel |
 | 1. Catálogo de ejercicios | Pendiente |
 | 2. Registro de sesiones | Pendiente |
 | 3. Actividades y cuerpo | Pendiente |
@@ -20,15 +20,19 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 
 App personal, para un solo usuario, que reemplaza los Excels de rutina: se carga en el gym desde el celular y se analiza desde la PC, con los mismos datos en los dos.
 
+Repo público y pieza de portfolio: quien quiera usarla hace fork y levanta su propia copia con su Supabase y su Vercel siguiendo el README.
+
 **Qué registra:**
 
 - **Fuerza:** sesiones por rutina (EMPUJE, TIRÓN, PIERNAS, TORSO A/B), con repeticiones, peso y tipo de cada serie.
 - **Actividades:** fútbol, pádel, HIIT, bici (km y minutos), movilidad, running y cualquier tipo nuevo.
-- **Soga:** saltos totales, mejor tanda sin cortar y minutos.
+- **Soga:** por rondas: cantidad de rondas, segundos de salto y de descanso por ronda (y, si los anotás, saltos totales y mejor tanda).
 - **Cuerpo:** peso corporal y pasos diarios.
 - **Planes:** catálogo de ejercicios, rutinas planificadas y sugerencias de progresión.
 
-**Fuera de alcance (por ahora):** varios usuarios, uso sin conexión con sincronización posterior, integración con relojes o Google Fit, publicación en tiendas de apps.
+**Idioma y tema:** la UI está en español (rioplatense) e inglés, y en modo claro y oscuro. Por defecto toma el idioma y el tema del sistema; los dos se cambian a mano en Más y la elección se recuerda en el dispositivo. El código, las tablas, las columnas y los valores guardados en la base van en inglés: la traducción vive solo en la UI.
+
+**Fuera de alcance (por ahora):** varios usuarios o instancia pública con registro, idiomas además de español e inglés, uso sin conexión con sincronización posterior, integración con relojes o Google Fit, publicación en tiendas de apps.
 
 ## Stack y arquitectura
 
@@ -53,22 +57,24 @@ La seguridad la da Row Level Security (RLS): cada fila guarda el `user_id` del d
 | Gráficos | SVG propio | Sin dependencia extra |
 | Instalable | vite-plugin-pwa | Ícono y pantalla completa en el celular |
 | Hosting | Vercel | Publica en cada push a GitHub |
+| Idiomas | Diccionario propio (`app/src/lib/i18n.tsx`) | Dos idiomas y pocas pantallas: no justifica una librería |
 | Tests | Vitest | Parser de series, progresión, estadísticas |
 
 Variables de entorno (en `app/.env.local`, ver `app/.env.example`): `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. La secret key (o la `service_role` legacy) nunca va al frontend.
 
 ## Modelo de datos
 
-Ocho tablas y una vista. La unidad mínima es la **serie**: una fila por serie, así las estadísticas salen con SQL y no hay que reinterpretar texto.
+Nueve tablas y una vista. La unidad mínima es la **serie**: una fila por serie, así las estadísticas salen con SQL y no hay que reinterpretar texto.
 
 | Tabla | Campos clave | Notas |
 | --- | --- | --- |
-| `exercises` | name, muscle_group, equipment, video_url, video_start_s, notes, archived | Catálogo. Nombre único por usuario. Se archiva en vez de borrar si tiene historial. `notes` = nota fija que se ve cada vez que se carga ("asiento en 4") |
+| `exercises` | name, muscle_group, equipment, weight_step, video_url, video_start_s, notes, archived | Catálogo. Nombre único por usuario. Se archiva en vez de borrar si tiene historial. `notes` = nota fija que se ve cada vez que se carga ("asiento en 4"). `weight_step` = salto de peso propio; vacío = el del equipo (2,5 kg barra y mancuerna, 5 kg máquina) |
 | `routines` | name, position, active, notes | Una rutina del plan (EMPUJE, TORSO A). `position` = orden del ciclo |
 | `routine_exercises` | routine_id, exercise_id, position, target_sets, rep_min, rep_max, default_set_type, rest_s, superset_group | Receta de cada rutina. El rango de reps alimenta la progresión |
 | `workouts` | date, routine_id (opcional), notes | Una sesión real. Sin rutina = sesión libre |
 | `workout_sets` | workout_id, exercise_id, position, set_number, reps, seconds, weight_kg, set_type, tempo, superset_group, notes | Una fila por serie. `reps` o `seconds`, nunca ambos vacíos (check constraint). |
-| `activities` | date, type, minutes, km, jumps, best_streak, notes | `jumps` y `best_streak` solo para soga |
+| `activity_types` | name, fields, archived | Lista editable de actividades (Fútbol, Pádel, Bici, Soga...). `fields text[]` = qué campos pide al cargar, entre `minutes`, `km`, `rounds`, `work_s`, `rest_s`, `jumps`, `best_streak`. Nombre único por usuario |
+| `activities` | date, activity_type_id, minutes, km, rounds, work_s, rest_s, jumps, best_streak, notes | Todos los campos opcionales; la pantalla muestra solo los `fields` del tipo. Soga: `rounds` × (`work_s` + `rest_s`). Borrar un tipo con actividades está bloqueado (`on delete restrict`) |
 | `body_weights` | date, kg | Pesajes |
 | `daily_steps` | date, steps | Único por usuario y fecha |
 | `personal_records` | vista | Desde `workout_sets`: mejor peso, mejor 1RM estimado y más reps por ejercicio |
@@ -112,68 +118,111 @@ Atajo de carga (ver arriba) y formato del importador: una línea por ejercicio; 
 
 Ida y vuelta obligatoria: `format(parse(x))` devuelve la forma canónica de `x` (por ejemplo `8-8-` vuelve como `8-8`).
 
-**Tipos de serie** (`set_type`), uno por serie: `normal` (por defecto), `calentamiento` (no cuenta para récords ni progresión), `drop`, `rest_pause`, `fallo`.
-**Tempo** (`tempo`): `lento`, `explosivo`, `pausa`. Reemplaza los "(lento)", "(aguantando)", "(explosiva)" que el Excel ponía en el nombre.
+**Tipos de serie** (`set_type`), uno por serie: `normal` (por defecto), `warmup` = calentamiento (no cuenta para récords ni progresión), `drop`, `rest_pause`, `failure` = fallo.
+**Tempo** (`tempo`): `slow` = lento, `explosive` = explosivo, `pause` = pausa. Reemplaza los "(lento)", "(aguantando)", "(explosiva)" que el Excel ponía en el nombre.
+**Equipo** (`exercises.equipment`): `barbell` = barra, `dumbbell` = mancuerna, `machine` = máquina, `cable` = polea, `bodyweight` = peso corporal, `other` = otro.
 **Superserie** (`superset_group`): ejercicios con el mismo número dentro de la sesión se muestran juntos.
 
 ## Plan de incrementos
 
-Cada incremento termina publicado y usable desde el celular. Se trabaja uno a la vez (`/incremento N`). Al cerrar uno: tildar sus criterios y actualizar la tabla **Estado**.
+Cada incremento termina publicado y usable desde el celular. Se trabaja uno a la vez (`/incremento N`): al empezar se revisa este plan y se ajusta. Al cerrar uno: tildar sus criterios y actualizar la tabla **Estado**.
+
+Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`. Navegación inferior fija: **Entrenar · Registrar · Historial · Estadísticas · Más** (Más = ejercicios, actividades, rutinas, importar, exportar, salir).
 
 ### 0. Base
-- Proyecto Vite + React + TS en `app/`, repo en GitHub, deploy automático en Vercel.
-- `npx supabase init` en la raíz, proyecto Supabase creado y linkeado, primera migración con todas las tablas y RLS, tipos generados.
-- Login, layout con navegación inferior y pantallas vacías.
+- Proyecto Vite + React + TS en `app/`, repo en GitHub (`nicolasroumec/gymbo`), deploy automático en Vercel.
+- `npx supabase init` en la raíz, proyecto Supabase creado y linkeado.
+- Primera migración con **todas** las tablas del modelo de datos, checks, índices, RLS y la vista `personal_records`; tipos generados. Revisión con `revisor-seguridad`.
+- `app/src/lib/supabase.ts`: cliente único tipado.
+- `LoginPage` (email + contraseña) y ruta protegida: sin sesión, todo redirige al login.
+- `Layout` con la navegación inferior y una página vacía por pestaña.
+- Idiomas: `lib/i18n.tsx` con los textos en español e inglés y un hook para usarlos; ningún texto de la UI escrito directo en un componente. El tipo del diccionario obliga a que los dos idiomas tengan las mismas claves; test de la detección del idioma.
+- Tema claro y oscuro: sigue al sistema por defecto, con selector en Más (sistema, claro, oscuro). Idioma y tema se guardan en localStorage.
 - `project_ref` cargado en `.mcp.json`.
+- `LICENSE` (MIT) y `README.md`: qué es, link a la app, stack, y cómo levantar tu propia copia (fork + Supabase + Vercel).
+
+**Paso a paso** (👤 = lo hacés vos en la web o la terminal; 🤖 = lo hace el agente):
+
+1. 👤 **Proyecto Supabase.** En supabase.com: New project, nombre `gymbo`, región South America (São Paulo). Guardá la contraseña de la base en tu gestor de contraseñas: se pide al linkear.
+2. 👤 **Claves locales.** Copiá `app/.env.example` a `app/.env.local` y completá `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` (Project Settings > API Keys). Nunca la secret key.
+3. 👤 **Tu usuario.** Authentication > Users > Add user > Create new user, con tu email, contraseña y "Auto Confirm User".
+4. 👤 **Cerrar el registro.** Authentication > Sign In / Providers: desactivar "Allow new users to sign up".
+5. 👤 **CLI.** En Claude Code: `! npx supabase login` (abre el navegador).
+6. 🤖 `npx supabase init` en la raíz.
+7. 👤 **Linkear.** `! npx supabase link --project-ref <ref>` (el ref está en la URL del proyecto: `supabase.com/dashboard/project/<ref>`). Pide la contraseña del paso 1.
+8. 👤 **MCP.** `setx SUPABASE_PROJECT_REF <ref>` en PowerShell y reiniciar Claude Code, para que `.mcp.json` lo tome sin escribir el ref en el repo.
+9. 🤖 **Migración inicial** con el skill `migracion`: todas las tablas, checks, índices, RLS y la vista `personal_records`. Revisión con `revisor-seguridad`.
+10. 👤 Aprobar `npx supabase db push --remote`.
+11. 🤖 Generar `app/src/lib/database.types.ts`.
+12. 🤖 **App:** borrar el ejemplo de Vite, crear `lib/supabase.ts`, `LoginPage`, ruta protegida, `LICENSE`, `README.md`, `Layout` con la navegación inferior y las cinco pestañas vacías; `app/vercel.json` con rewrite a `/index.html` para que React Router funcione al recargar.
+13. 🤖 Probar a 360 px con `npm run dev`, `npm run check`, commit y push.
+14. 👤 **Vercel.** En vercel.com: Add New > Project, importar `gymbo`, Root Directory `app`, framework Vite, y cargar las dos variables `VITE_SUPABASE_*`. Deploy.
+15. 👤 **URL en Supabase.** Authentication > URL Configuration: Site URL = la URL de Vercel.
+16. 👤 **Prueba final.** Entrar desde el celular a la URL de Vercel con tu cuenta, e intentar registrarse con otro email para confirmar que falla.
+
+- [x] Código en GitHub.
 - [ ] Entrás con tu cuenta desde el celular a la URL pública.
 - [ ] El registro de usuarios nuevos está desactivado en Supabase.
+- [ ] README y LICENSE en el repo.
 
 ### 1. Catálogo de ejercicios
-- Alta, edición y archivo, con grupo muscular, equipo y link al video con minuto.
-- Buscador por nombre y filtro por grupo muscular.
-- [ ] Están cargados los ejercicios de la rutina actual.
+- `ExercisesPage`: lista con buscador por nombre y filtro por grupo muscular; archivados ocultos con opción de verlos.
+- `ExerciseFormPage`: alta y edición con grupo muscular, equipo, salto de peso (opcional), link al video con minuto y nota fija.
+- Archivar en vez de borrar si tiene series; borrar solo si no tiene.
+- `lib/video.ts`: arma el link de YouTube con el minuto (`?t=`). Test.- [ ] Están cargados los ejercicios de la rutina actual.
 
 ### 2. Registro de sesiones
-- Parser de series con tests.
-- Cargar sesión con la grilla de la sección **Pantalla de carga**: fecha, rutina, ejercicios, series con tipo, tempo, superserie.
-- "Repetir la última sesión de esta rutina": arma la grilla con las mismas series y la columna Anterior.
-- Temporizador de descanso al tildar una serie y aviso de récord.
-- Borrador de la sesión en curso guardado en el teléfono (localStorage) hasta que se guarda.
-- Historial, edición y borrado.
+- `lib/sets.ts`: `parse` y `format` de la notación, con la tabla de ejemplos como tests e ida y vuelta.
+- `lib/previous.ts`: para cada ejercicio, las series de la última vez (misma rutina primero, si no cualquier sesión), emparejadas por número de serie. Test.
+- `lib/records.ts`: dada una serie y los récords actuales, dice si es récord (peso, 1RM estimado o reps con ese peso); ignora calentamiento. Test.
+- `lib/draft.ts`: guardar y recuperar la sesión en curso en localStorage; se borra solo cuando Supabase confirma el guardado. Test.
+- `WorkoutPage`: grilla de la **Pantalla de carga**, selector de ejercicio con búsqueda, tipo de serie, tempo, superserie, temporizador de descanso, aviso 🏆, nota fija del ejercicio.
+- "Repetir la última sesión de esta rutina".
+- `HistoryPage` y detalle de sesión: lista por fecha, editar y borrar.
 - [ ] Se anota una sesión real en el gym desde el celular sin usar el Excel.
 
 ### 3. Actividades y cuerpo
-- Actividades con campos según el tipo: km para bici y running, saltos y mejor tanda para soga.
-- Peso corporal y pasos diarios.
+- `ActivityTypesPage` (en Más): alta, edición y archivo de tipos, eligiendo qué campos pide cada uno. Si la lista está vacía, ofrece cargar Fútbol, Pádel, HIIT, Bici, Movilidad, Running y Soga.
+- `RegisterPage` (pestaña Registrar): cargar la actividad del día con los campos de su tipo; peso corporal; pasos.
+- Soga: rondas, segundos de salto y de descanso; muestra el tiempo total calculado.
+- `lib/numbers.ts`: lectura de decimales con coma o punto, compartida por todos los formularios. Test.
 - [ ] Una semana completa (gym, fútbol, soga, peso) registrada solo en la app.
 
 ### 4. Importador de Excels
-- Pantalla "Importar": se sube el .xlsx, se lee en el navegador (SheetJS), vista previa, y recién ahí se guarda.
-- Crea los ejercicios que falten y permite unificar nombres parecidos.
+- Lee el formato de los Excels del autor (ver **Importador de Excels**); para otros usuarios queda documentado en el README, no se generaliza.
+- Dependencia nueva: SheetJS (`xlsx`), ya prevista en el stack.
+- `lib/import/`: un lector por origen de la tabla **Importador de Excels** (fuerza, bici fija, calendario, pasos, peso, lista de ejercicios) que devuelve filas listas para insertar, sin tocar la base. Tests con celdas de ejemplo escritas en el test (los .xlsx reales no se commitean).
+- `lib/import/similar.ts`: agrupa nombres parecidos para unificar. Test.
+- `ImportPage`: subir archivo, vista previa con conteos por mes y avisos (fechas fuera de mes, nombres a unificar), confirmar y guardar. Crea los tipos de actividad y ejercicios que falten. Reimportar no duplica.
 - [ ] Datos de 2025 y 2026 importados; totales por mes iguales a la hoja "Total" (tolerancia ±1 sesión por mes).
 
 ### 5. Estadísticas
-- Progreso por ejercicio, récords personales, totales por mes, volumen semanal por grupo muscular.
-- Gráficos de soga, peso corporal y pasos.
+- `lib/stats.ts`: 1RM Epley, volumen, peso máximo por sesión, series semanales por grupo muscular, frecuencia mensual por tipo. Tests.
+- `components/LineChart.tsx` y `components/BarChart.tsx` en SVG propio.
+- `StatsPage`: progreso por ejercicio (elegís ejercicio y período), récords, tabla mensual, volumen semanal por grupo, soga, peso corporal y pasos.
 - [ ] "¿Mejoré en press plano este año?" se responde en dos toques.
 
 ### 6. Planes y splits
-- Rutinas con receta: ejercicios en orden, series objetivo, rango de reps, descanso, superseries.
-- Ciclo del plan y pantalla "Hoy toca", que arma la sesión desde la rutina.
+- `RoutinesPage` y `RoutineFormPage`: rutinas con receta (ejercicios en orden, series objetivo, rango de reps, tipo por defecto, descanso, superseries); reordenar el ciclo.
+- `lib/cycle.ts`: qué rutina toca hoy según la última sesión hecha y el orden del ciclo. Test.
+- Pestaña Entrenar = "Hoy toca": arma la sesión desde la receta, con la columna Anterior.
 - [ ] Al abrir la app en el gym, la sesión del día ya está armada.
 
 ### 7. Progresión
-- Sugerencia por ejercicio al cargar la sesión: subir peso, subir reps o mantener.
+- `lib/progression.ts`: progresión doble (ver **Estadísticas y progresión**), con `weight_step` del ejercicio o el del equipo. Tests por cada regla.
+- En la grilla, cada ejercicio muestra su objetivo de hoy (peso y reps) y se acepta con un toque.
 - [ ] Cada ejercicio del plan muestra su objetivo para hoy.
 
 ### 8. PWA y pulido
-- Instalable con ícono, pantalla completa, carga rápida con red lenta.
-- Exportar todos los datos a JSON o CSV.
+- Dependencia nueva: `vite-plugin-pwa`, prevista en el stack. Ícono, nombre Gymbo, pantalla completa, caché de la app.
+- `lib/export.ts`: todas las tablas a JSON y a CSV. Test.
+- Pantalla Exportar en Más.
+- README de portfolio: capturas o GIF con datos inventados, decisiones técnicas (RLS, una fila por serie, lógica pura testeada).
 - [ ] Se usa como app del teléfono y hay un respaldo descargado.
 
 ## Estadísticas y progresión
 
-Todas las métricas salen de `workout_sets`, sin series de `calentamiento`. Se guardan series crudas, nunca resultados calculados.
+Todas las métricas salen de `workout_sets`, sin series de calentamiento (`warmup`). Se guardan series crudas, nunca resultados calculados.
 
 | Métrica | Cálculo | Dónde se ve |
 | --- | --- | --- |
@@ -183,7 +232,7 @@ Todas las métricas salen de `workout_sets`, sin series de `calentamiento`. Se g
 | Series por grupo | Series por semana por `muscle_group` | Balance empuje / tirón / piernas |
 | Récords | Mejor peso, mejor 1RM, más reps con un mismo peso | Lista, aviso al guardar |
 | Frecuencia | Sesiones y actividades por mes y tipo | Tabla mensual (como la hoja "Total") |
-| Soga | Saltos totales y mejor tanda por sesión | Gráfico de soga |
+| Soga | Rondas y tiempo de salto por sesión (saltos y mejor tanda si están) | Gráfico de soga |
 
 **Progresión doble** con el rango `rep_min`–`rep_max` de la receta (`app/src/lib/progression.ts`, función pura con tests):
 
@@ -198,7 +247,7 @@ Los archivos están en `docs/*.xlsx` (datos personales, fuera de git). Una prueb
 | Origen | Cómo se lee | Destino |
 | --- | --- | --- |
 | Hoja mensual, bloque FUERZA (columna B, encabezados en fila 3) | Fila con nombre + **fechas contiguas desde la columna C** = rutina y sus sesiones; filas siguientes = ejercicios, una celda por sesión. Ojo: la columna FECHA del calendario cae en H–J según la hoja, por eso solo cuentan fechas contiguas | `workouts` + `workout_sets` |
-| Hoja mensual, BICI FIJA | Columnas FECHA, DISTANCIA, TIEMPO, ubicadas por encabezado (la posición cambia entre hojas) | `activities` tipo Bici |
+| Hoja mensual, BICI FIJA | Columnas FECHA, DISTANCIA, TIEMPO, ubicadas por encabezado (la posición cambia entre hojas) | `activities` tipo Bici (se crea el tipo si falta) |
 | Hoja mensual, CALENDARIO | FECHA + columnas contiguas FUE, BICI, HIIT, FUT, MOV con "X" | `activities`; se omite si ya existe con más detalle (FUE si hay sesión, BICI si hay bici fija) |
 | Hoja mensual, columna PASOS | Número por fecha | `daily_steps` |
 | Peso.xlsx | Pares FECHA / PESO por año; ignorar ceros y negativos | `body_weights` |
@@ -222,12 +271,14 @@ Los archivos están en `docs/*.xlsx` (datos personales, fuera de git). Una prueb
 | Sin señal en el gym | Borrador local de la sesión en curso (incremento 2); offline completo solo si hace falta |
 | Supabase gratis pausa el proyecto tras 7 días sin uso | Uso diario; exportación de respaldo (incremento 8) |
 | Clave publicable visible en el navegador | RLS en todas las tablas, registro cerrado |
+| Repo público en GitHub | `.env*` y `docs/*.xlsx` ignorados; push protection de GitHub activado; los tests del importador usan fixtures inventados, nunca datos reales |
 | Nombres de ejercicios duplicados | Selector con búsqueda y unificación en el importador |
 
 **Para decidir:**
 
-- [ ] Tipos de actividad: lista fija o libre con sugerencias (propuesta: libre con sugerencias).
-- [ ] Salto de peso para la progresión: por tipo de equipo o configurable por ejercicio.
-- [ ] Soga: ¿registrar variantes (doble salto, cruzado) o intervalos?
-- [ ] Unidades: solo kg o también libras.
+- [x] Tipos de actividad: lista editable en la app (`activity_types`), cada tipo elige qué campos pide.
+- [x] Salto de peso: por equipo, con `exercises.weight_step` para pisarlo en un ejercicio.
+- [x] Soga: por rondas (cantidad, segundos de salto y de descanso). Variantes en notas.
+- [x] Unidades: solo kg.
+- [x] Distribución: app personal; otros la usan haciendo fork con su propio Supabase y Vercel. Licencia MIT.
 - [x] Nombre: **Gymbo** (repo `gymbo`; dominio: el que dé Vercel, `gymbo.vercel.app` si está libre).

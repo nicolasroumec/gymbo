@@ -9,3 +9,8 @@ CLAUDE.local.md
 # Supabase CLI
 supabase/.temp/
 supabase/.branches/
+
+# Claves: cualquier .env salvo el ejemplo (el repo es público)
+.env*
+!.env.example
+supabase/.env*

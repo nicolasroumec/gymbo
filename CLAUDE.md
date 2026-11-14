@@ -1,6 +1,6 @@
 # Gymbo
 
-App personal de entrenamiento (un solo usuario): fuerza, actividades, soga, peso y pasos. React + TypeScript + Supabase, sin backend propio.
+App personal de entrenamiento (un solo usuario): fuerza, actividades, soga, peso y pasos. Repo público y de portfolio: otros la usan haciendo fork con su propio Supabase. React + TypeScript + Supabase, sin backend propio.
 
 `docs/especificacion.md` es la fuente de verdad: alcance, modelo de datos, notación de series, plan de incrementos y su estado. Leela antes de empezar o planificar cualquier incremento.
 
@@ -20,8 +20,8 @@ Desde `app/`:
 
 Desde la raíz:
 - `npx supabase migration new <nombre_en_snake_case>`
-- `npx supabase db push`: aplica migraciones en la base real (pide confirmación)
-- `npx supabase gen types typescript --linked > app/src/lib/database.types.ts`: después de cada migración
+- `npx supabase db push --remote`: aplica migraciones en la base real (pide confirmación; sin `--remote` apunta al stack local)
+- `npx supabase gen types typescript --remote > app/src/lib/database.types.ts`: después de cada migración
 
 ## Decisiones que no están en el código
 
@@ -30,6 +30,7 @@ Desde la raíz:
 - La lógica de dominio (parser, progresión, estadísticas) va en `app/src/lib/` como funciones puras con su `*.test.ts` al lado. Los componentes no calculan.
 - Gráficos en SVG propio. No agregar dependencias sin preguntar: el stack está fijado en la especificación.
 - Las migraciones commiteadas no se editan: se crea una nueva. Un hook lo bloquea.
+- El repo es público: nada de claves, project_ref, emails ni datos reales (pesos, fechas, Excels) en archivos commiteados, tampoco en tests ni fixtures.
 
 ## Gotchas
 
@@ -41,5 +42,5 @@ Desde la raíz:
 ## Cómo trabajar con el usuario
 
 - Está aprendiendo React, TypeScript y Supabase (viene de .NET/Blazor). Al cerrar un cambio, explicá en 3 a 5 líneas los conceptos nuevos que usaste, comparando con C# cuando ayude.
-- UI en español rioplatense (vos). Código, tablas y columnas en inglés. Docs y mensajes de commit en español.
+- UI en español rioplatense (vos) e inglés: todo texto visible sale de `app/src/lib/i18n.tsx`, nunca escrito en el componente. Código, tablas, columnas y valores guardados en inglés. Docs en español. Commits con Conventional Commits en inglés (`feat: ...`, `fix: ...`, `docs: ...`); los hace el usuario a mano.
 - Un incremento a la vez, con `/incremento N`. Al terminar, tildá sus criterios y actualizá la tabla Estado de la especificación.
