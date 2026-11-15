@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  draftToRows, groupSupersets, workoutToDraft, nextSetType, parseDraft, setsFromNotation, setsToNotation, toggleDone, type Draft, type DraftExercise, type DraftSet,
+  draftToRows, groupSupersets, repeatDraft, workoutToDraft, nextSetType, parseDraft, setsFromNotation, setsToNotation, toggleDone, type Draft, type DraftExercise, type DraftSet,
 } from './draft'
 import { format, parse } from './sets'
 import type { PastSet } from './previous'
@@ -146,5 +146,21 @@ describe('workoutToDraft', () => {
       { exercise_id: 'press', position: 0, set_number: 1, reps: null, seconds: 40, weight_kg: null, set_type: 'normal' as const, tempo: 'pause' as const, superset_group: null },
     ]
     expect(draftToRows(workoutToDraft('w9', '2026-01-08', rows))).toEqual({ rows: [{ ...rows[0], workout_id: 'w9' }] })
+  })
+})
+
+describe('repeatDraft', () => {
+  it('copia ejercicios, tipos, tempo y superserie, con las series vacías y sin marcar como edición', () => {
+    const source: Draft = {
+      workout_id: 'viejo', date: '2026-01-01', editing: true,
+      exercises: [{ exercise_id: 'press', tempo: 'slow', superset: 1, sets: [{ ...set('10', '12'), set_type: 'warmup' }, set('20', '8')] }],
+    }
+    expect(repeatDraft(source, 'nuevo', '2026-01-08')).toEqual({
+      workout_id: 'nuevo', date: '2026-01-08',
+      exercises: [{ exercise_id: 'press', tempo: 'slow', superset: 1, sets: [
+        { kg: '', reps: '', done: false, set_type: 'warmup' },
+        { kg: '', reps: '', done: false, set_type: 'normal' },
+      ] }],
+    })
   })
 })

@@ -13,7 +13,7 @@ Rama: `feat/exercise-catalog`.
   `ExerciseFormPage` (nuevo y editar): grupo, equipo, salto de peso, video con minuto, nota fija.
 - [x] **`feat: archive exercises with history instead of deleting`**
   Borrar solo si no tiene series en `workout_sets`; si tiene, archivar.
-- [ ] **`docs: close increment 1`**
+- [x] **`docs: close increment 1`**
   Tildar el criterio y actualizar la tabla Estado.
 
 👤 Antes del cierre: cargar los ejercicios de la rutina actual desde la app.

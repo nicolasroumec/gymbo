@@ -137,3 +137,13 @@ export function workoutToDraft(workout_id: string, date: string, sets: SavedSet[
   }
   return { workout_id, date, exercises, editing: true }
 }
+
+// "Repetir": sesión nueva con los mismos ejercicios, tipos de serie, tempo y superseries, sin cargar.
+// La columna Anterior muestra los valores; tildar ✓ los copia.
+export function repeatDraft(source: Draft, workout_id: string, date: string): Draft {
+  return {
+    workout_id,
+    date,
+    exercises: source.exercises.map((e) => ({ ...e, sets: e.sets.map((s) => emptySet(s.set_type)) })),
+  }
+}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n, type Texts } from '../lib/i18n'
-import { loadDraft, saveDraft, setsToNotation, workoutToDraft, type Draft } from '../lib/draft'
+import { loadDraft, repeatDraft, saveDraft, setsToNotation, workoutToDraft, type Draft } from '../lib/draft'
 import { formatDate } from '../lib/history'
 import { format } from '../lib/sets'
 
@@ -28,12 +28,12 @@ export default function WorkoutDetailPage() {
       })
   }, [id])
 
-  // Editar = cargar la sesión en la pantalla de carga; al guardar pisa esta misma sesión (mismo id).
-  function edit() {
+  // Abre un borrador en la pantalla de carga, avisando si pisa otra sesión en curso sin guardar.
+  function openInWorkout(next: Draft) {
     const current = loadDraft()
-    const unsaved = current && current.workout_id !== id && current.exercises.length > 0
+    const unsaved = current && current.workout_id !== next.workout_id && current.exercises.length > 0
     if (unsaved && !confirm(t.confirmReplaceDraft)) return
-    saveDraft(workout!)
+    saveDraft(next)
     navigate('/')
   }
 
@@ -68,7 +68,11 @@ export default function WorkoutDetailPage() {
 
       {workout && (
         <div className="actions">
-          <button onClick={edit} disabled={busy}>{t.edit}</button>
+          <button onClick={() => openInWorkout(repeatDraft(workout, crypto.randomUUID(), new Date().toLocaleDateString('sv')))} disabled={busy}>
+            {t.repeat}
+          </button>
+          {/* Editar: misma sesión (mismo id), así al guardar se pisa */}
+          <button className="secondary" onClick={() => openInWorkout(workout)} disabled={busy}>{t.edit}</button>
           <button className="secondary" onClick={remove} disabled={busy}>{t.delete}</button>
         </div>
       )}
