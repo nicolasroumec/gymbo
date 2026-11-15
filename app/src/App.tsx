@@ -4,7 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
-import TrainPage from './pages/TrainPage'
+import WorkoutPage from './pages/WorkoutPage'
 import RegisterPage from './pages/RegisterPage'
 import HistoryPage from './pages/HistoryPage'
 import StatsPage from './pages/StatsPage'
@@ -30,7 +30,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={session ? <Navigate to="/" replace /> : <LoginPage />} />
         <Route element={session ? <Layout /> : <Navigate to="/login" replace />}>
-          <Route index element={<TrainPage />} />
+          <Route index element={<WorkoutPage />} />
           <Route path="registrar" element={<RegisterPage />} />
           <Route path="historial" element={<HistoryPage />} />
           <Route path="estadisticas" element={<StatsPage />} />

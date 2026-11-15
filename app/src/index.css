@@ -256,3 +256,84 @@ form.rows {
   padding-top: 15svh;
 }
 
+
+/* Campo con etiqueta arriba */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.success {
+  margin: 0;
+  color: var(--accent);
+}
+
+/* Botones lado a lado que se reparten el ancho */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.actions button {
+  flex: 1;
+}
+
+/* Tarjeta de un ejercicio en la sesión */
+.card {
+  padding: 12px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border-radius: 8px;
+}
+
+.card h2 {
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+
+.card > p {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+/* Grilla de carga: Serie · Anterior · kg · Reps · ✓ (entra en 360 px) */
+.grid {
+  display: grid;
+  grid-template-columns: 2em 1fr 4.2em 3.6em 36px;
+  gap: 6px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.grid > span:nth-child(-n + 5) {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.grid input {
+  padding: 8px 4px;
+  text-align: center;
+  background: var(--bg);
+}
+
+.grid input[type='checkbox'] {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  justify-self: center;
+}
+
+/* Resultado del buscador que se toca para elegir */
+.list button.pick {
+  width: 100%;
+  min-height: 56px;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border-radius: 0;
+}

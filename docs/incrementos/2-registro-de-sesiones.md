@@ -7,12 +7,8 @@ Rama: `feat/workout-logging`.
   `lib/sets.ts` (`parse` y `format`) con la tabla de ejemplos como tests e ida y vuelta.
 - [x] **`feat: add previous sets lookup`**
   `lib/previous.ts` y test.
-- [ ] **`feat: add personal record detection`**
-  `lib/records.ts` y test.
-- [ ] **`feat: add local workout draft`**
-  `lib/draft.ts` y test.
-- [ ] **`feat: add workout logging grid`**
-  `WorkoutPage`: elegir ejercicios con búsqueda, grilla kg/reps/✓ con columna Anterior, nota fija, guardar usando el borrador.
+- [x] **`feat: add workout logging grid`**
+  `lib/records.ts`, `lib/draft.ts` y sus tests. `WorkoutPage`: elegir ejercicios con búsqueda, grilla kg/reps/✓ con columna Anterior, nota fija, guardar usando el borrador.
 - [ ] **`feat: add set types, tempo and supersets to workout grid`**
 - [ ] **`feat: add notation shortcut to workout grid`**
   Campo de texto por ejercicio que rellena la grilla con `parse`.
