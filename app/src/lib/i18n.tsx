@@ -151,6 +151,11 @@ const es = {
   defaultSetType: 'Tipo de serie',
   invalidRecipe: 'Revisá los números: series y reps mayores a 0, descanso en segundos, todos enteros.',
   invalidRepRange: 'El mínimo de reps no puede ser mayor que el máximo.',
+  todayRoutine: 'Hoy toca',
+  start: 'Empezar',
+  freeWorkoutHint: 'O agregá ejercicios abajo para una sesión libre.',
+  emptyRoutine: 'Esta rutina no tiene ejercicios: cargá su receta en Más → Rutinas.',
+  target: 'Objetivo',
   confirmDeleteEntry: '¿Borrar este registro? No se puede deshacer.',
 }
 
@@ -307,6 +312,11 @@ const en: Texts = {
   defaultSetType: 'Set type',
   invalidRecipe: 'Check the numbers: sets and reps above 0, rest in seconds, all whole numbers.',
   invalidRepRange: 'Min reps cannot be greater than max reps.',
+  todayRoutine: "Today's routine",
+  start: 'Start',
+  freeWorkoutHint: 'Or add exercises below for a free workout.',
+  emptyRoutine: 'This routine has no exercises: set up its recipe in More → Routines.',
+  target: 'Target',
   confirmDeleteEntry: 'Delete this entry? This cannot be undone.',
 }
 

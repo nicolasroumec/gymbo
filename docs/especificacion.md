@@ -10,7 +10,7 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 | 1. Catálogo de ejercicios | Terminado |
 | 2. Registro de sesiones | Terminado |
 | 3. Actividades y cuerpo | Terminado (falta la semana de prueba) |
-| 4. Planes y splits | En curso |
+| 4. Planes y splits | Terminado (falta probarlo en el gym) |
 | 5. Importador de Excels | Pendiente |
 | 6. Estadísticas | Pendiente |
 | 7. Progresión | Pendiente |
@@ -189,7 +189,7 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - `lib/records.ts`: dada una serie y los récords actuales, dice si es récord (peso, 1RM estimado o reps con ese peso); ignora calentamiento. Test.
 - `lib/draft.ts`: guardar y recuperar la sesión en curso en localStorage; se borra solo cuando Supabase confirma el guardado. Test.
 - `WorkoutPage`: grilla de la **Pantalla de carga**, selector de ejercicio con búsqueda, tipo de serie, tempo, superserie, temporizador de descanso, aviso 🏆, nota fija del ejercicio.
-- "Repetir" una sesión pasada desde el historial (la última de una rutina llega con el incremento 4).
+- "Repetir" una sesión pasada desde el historial. Empezar una rutina desde "Hoy toca" (incremento 4) cubre "repetir la última sesión de esta rutina".
 - `HistoryPage` y detalle de sesión: lista por fecha, editar y borrar.
 - [x] Se anota una sesión real en el gym desde el celular sin usar el Excel.
 
@@ -204,6 +204,9 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - `RoutinesPage` y `RoutineFormPage`: rutinas con receta (ejercicios en orden, series objetivo, rango de reps, tipo por defecto, descanso, superseries); reordenar el ciclo.
 - `lib/cycle.ts`: qué rutina toca hoy según la última sesión hecha y el orden del ciclo. Test.
 - Pestaña Entrenar = "Hoy toca": arma la sesión desde la receta, con la columna Anterior.
+- Se empieza con un toque (Empezar), para no crear un borrador cada vez que se abre la app; se puede elegir otra rutina o hacer una sesión libre. Las sesiones libres no mueven el ciclo.
+- La sesión guarda su rutina (`workouts.routine_id`): "Anterior" prioriza esa rutina, el descanso sale de la receta (90 s si no tiene) y cada tarjeta muestra el objetivo de reps. El historial muestra el nombre de la rutina.
+- El tempo no está en la receta (no hay columna): se elige en la sesión.
 - [ ] Al abrir la app en el gym, la sesión del día ya está armada.
 
 ### 5. Importador de Excels

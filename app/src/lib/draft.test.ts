@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  draftToRows, groupSupersets, repeatDraft, workoutToDraft, nextSetType, parseDraft, setsFromNotation, setsToNotation, toggleDone, type Draft, type DraftExercise, type DraftSet,
+  draftFromRecipe, draftToRows, groupSupersets, repeatDraft, repTarget, workoutToDraft, nextSetType, parseDraft, setsFromNotation, setsToNotation, toggleDone, type Draft, type DraftExercise, type DraftSet,
 } from './draft'
 import { format, parse } from './sets'
 import type { PastSet } from './previous'
@@ -130,7 +130,7 @@ describe('workoutToDraft', () => {
       { ...base, exercise_id: 'press', position: 0, set_number: 1, set_type: 'warmup', tempo: 'slow', superset_group: 1 },
     ])
     expect(d).toEqual({
-      workout_id: 'w9', date: '2026-01-08', editing: true,
+      workout_id: 'w9', date: '2026-01-08', editing: true, routine_id: null,
       exercises: [
         { exercise_id: 'press', tempo: 'slow', superset: 1, sets: [
           { kg: '20', reps: '8', done: true, set_type: 'warmup' },
@@ -156,11 +156,52 @@ describe('repeatDraft', () => {
       exercises: [{ exercise_id: 'press', tempo: 'slow', superset: 1, sets: [{ ...set('10', '12'), set_type: 'warmup' }, set('20', '8')] }],
     }
     expect(repeatDraft(source, 'nuevo', '2026-01-08')).toEqual({
-      workout_id: 'nuevo', date: '2026-01-08',
+      workout_id: 'nuevo', date: '2026-01-08', routine_id: null,
       exercises: [{ exercise_id: 'press', tempo: 'slow', superset: 1, sets: [
         { kg: '', reps: '', done: false, set_type: 'warmup' },
         { kg: '', reps: '', done: false, set_type: 'normal' },
       ] }],
     })
+  })
+})
+
+describe('draftFromRecipe', () => {
+  it('arma la sesión en el orden de la receta, con las series objetivo y su tipo', () => {
+    const base: Draft = { workout_id: 'w1', date: '2026-01-08', exercises: [] }
+    const recipe = [
+      { exercise_id: 'remo', position: 1, target_sets: null, rep_min: null, rep_max: null, default_set_type: 'normal', rest_s: null, superset_group: null },
+      { exercise_id: 'press', position: 0, target_sets: 2, rep_min: 8, rep_max: 12, default_set_type: 'warmup', rest_s: 120, superset_group: 1 },
+    ]
+    expect(draftFromRecipe(base, 'empuje', recipe)).toEqual({
+      workout_id: 'w1', date: '2026-01-08', routine_id: 'empuje',
+      exercises: [
+        { exercise_id: 'press', superset: 1, rest_s: 120, rep_min: 8, rep_max: 12, sets: [
+          { kg: '', reps: '', done: false, set_type: 'warmup' },
+          { kg: '', reps: '', done: false, set_type: 'warmup' },
+        ] },
+        { exercise_id: 'remo', superset: null, rest_s: null, rep_min: null, rep_max: null, sets: [
+          { kg: '', reps: '', done: false, set_type: 'normal' },
+        ] },
+      ],
+    })
+  })
+})
+
+describe('repTarget', () => {
+  const ex = (rep_min: number | null, rep_max: number | null): DraftExercise => ({ exercise_id: 'e', sets: [], rep_min, rep_max })
+
+  it('muestra el rango, un solo número o nada', () => {
+    expect(repTarget(ex(8, 12))).toBe('8–12')
+    expect(repTarget(ex(10, 10))).toBe('10')
+    expect(repTarget(ex(null, 12))).toBe('12')
+    expect(repTarget(ex(null, null))).toBeNull()
+  })
+})
+
+describe('rutina de la sesión', () => {
+  it('editar y repetir conservan la rutina', () => {
+    const saved = workoutToDraft('w9', '2026-01-08', [], 'empuje')
+    expect(saved.routine_id).toBe('empuje')
+    expect(repeatDraft(saved, 'nuevo', '2026-01-09').routine_id).toBe('empuje')
   })
 })

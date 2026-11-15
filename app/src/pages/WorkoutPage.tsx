@@ -3,17 +3,18 @@ import { supabase } from '../lib/supabase'
 import { useI18n, type Texts } from '../lib/i18n'
 import { filterExercises } from '../lib/exercises'
 import {
-  draftToRows, emptySet, groupSupersets, loadDraft, nextSetType, readSet, saveDraft, setsFromNotation, setsToNotation, setText,
-  TEMPOS, toggleDone,
+  draftFromRecipe, draftToRows, emptySet, groupSupersets, loadDraft, nextSetType, readSet, repTarget, saveDraft, setsFromNotation,
+  setsToNotation, setText, TEMPOS, toggleDone,
   type Draft, type DraftExercise, type DraftSet, type SetType, type Tempo,
 } from '../lib/draft'
 import { previousSets, type PastSet } from '../lib/previous'
+import { nextRoutine } from '../lib/cycle'
 import { sessionRecords, type RecordSet } from '../lib/records'
 import { format, parse } from '../lib/sets'
 import { formatTimestamp } from '../lib/video'
 import type { Tables } from '../lib/database.types'
 
-// Sin receta todavía: el descanso por ejercicio (routine_exercises.rest_s) llega con las rutinas, en el incremento 4.
+// Descanso cuando la receta no dice nada (o es una sesión libre).
 const REST_S = 90
 
 const newDraft = (): Draft => ({
@@ -77,6 +78,10 @@ export default function WorkoutPage() {
   const [query, setQuery] = useState('')
   const [message, setMessage] = useState<keyof Texts | null>(null)
   const [saving, setSaving] = useState(false)
+  // Ciclo: rutinas y la rutina de la última sesión que tuvo una. chosen = la elegida a mano en "Hoy toca".
+  const [routines, setRoutines] = useState<Pick<Tables<'routines'>, 'id' | 'name' | 'position' | 'active'>[]>([])
+  const [lastRoutineId, setLastRoutineId] = useState<string | null>(null)
+  const [chosen, setChosen] = useState('')
 
   // Cada cambio queda en localStorage: si se corta la señal o se cierra la pestaña, no se pierde nada.
   useEffect(() => saveDraft(draft), [draft])
@@ -84,6 +89,15 @@ export default function WorkoutPage() {
   // Solo al abrir: después cada ejercicio trae su historial al agregarlo.
   useEffect(() => {
     supabase.from('exercises').select().then(({ data, error }) => (error ? setMessage('loadError') : setCatalog(data)))
+    Promise.all([
+      supabase.from('routines').select('id, name, position, active').order('position'),
+      supabase.from('workouts').select('routine_id').not('routine_id', 'is', null)
+        .order('date', { ascending: false }).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    ]).then(([r, w]) => {
+      if (r.error || w.error) return setMessage('loadError')
+      setRoutines(r.data)
+      setLastRoutineId(w.data?.routine_id ?? null)
+    })
     Promise.all(draft.exercises.map((e) => fetchHistory(e.exercise_id, draft.workout_id))).then((results) => {
       if (results.includes(null)) setMessage('loadError')
       setPast(results.flatMap((r) => r?.past ?? []))
@@ -106,12 +120,29 @@ export default function WorkoutPage() {
     return () => clearInterval(id)
   }, [restEnd])
 
-  function startRest() {
+  function startRest(seconds: number) {
     setNow(Date.now())
-    setRestEnd(Date.now() + REST_S * 1000)
+    setRestEnd(Date.now() + seconds * 1000)
   }
 
-  const previous = previousSets(past, null)
+  // "Anterior" prioriza la última vez de la misma rutina.
+  const previous = previousSets(past, draft.routine_id ?? null)
+  const today = nextRoutine(routines, lastRoutineId)
+  const routineName = routines.find((r) => r.id === draft.routine_id)?.name
+  const selectedRoutine = chosen || today?.id || ''
+
+  // Arma la sesión desde la receta y trae "Anterior" y récords de cada ejercicio.
+  async function startRoutine(routineId: string) {
+    const { data, error } = await supabase.from('routine_exercises').select().eq('routine_id', routineId)
+    if (error) return setMessage('loadError')
+    const next = draftFromRecipe(newDraft(), routineId, data)
+    if (next.exercises.length === 0) return setMessage('emptyRoutine')
+    const histories = await Promise.all(next.exercises.map((e) => fetchHistory(e.exercise_id, next.workout_id)))
+    setMessage(histories.includes(null) ? 'loadError' : null)
+    setPast(histories.flatMap((h) => h?.past ?? []))
+    setRecords(histories.flatMap((h) => h?.records ?? []))
+    setDraft(next)
+  }
   const added = new Set(draft.exercises.map((e) => e.exercise_id))
   const matches = filterExercises(catalog.filter((c) => !added.has(c.id)), query, null, false)
 
@@ -163,12 +194,14 @@ export default function WorkoutPage() {
     setSaving(true)
     setMessage(null)
     // Pisa la sesión y sus series: si un intento anterior se cortó a la mitad, reintentar no duplica nada.
-    const workout = await supabase.from('workouts').upsert({ id: draft.workout_id, date: draft.date })
+    const workout = await supabase.from('workouts').upsert({ id: draft.workout_id, date: draft.date, routine_id: draft.routine_id ?? null })
     const cleared = workout.error ? workout : await supabase.from('workout_sets').delete().eq('workout_id', draft.workout_id)
     const inserted = cleared.error ? cleared : await supabase.from('workout_sets').insert(result.rows)
     setSaving(false)
     if (inserted.error) return setMessage('saveError')
-    // Recién con el OK de Supabase se reemplaza el borrador.
+    // Recién con el OK de Supabase se reemplaza el borrador. El ciclo avanza si la sesión tenía rutina.
+    if (draft.routine_id) setLastRoutineId(draft.routine_id)
+    setChosen('')
     setDraft(newDraft())
     setPast([])
     setRecords([])
@@ -178,13 +211,24 @@ export default function WorkoutPage() {
 
   return (
     <>
-      <h1>{draft.editing ? t.editWorkout : t.workout}</h1>
+      <h1>{draft.editing ? t.editWorkout : t.workout}{routineName && ` · ${routineName}`}</h1>
       {message &&
         (message === 'workoutSaved' ? (
           <p role="status" className="success">{t.workoutSaved}</p>
         ) : (
           <p role="alert" className="error">{t[message]}</p>
         ))}
+
+      {draft.exercises.length === 0 && !draft.editing && routines.some((r) => r.active) && (
+        <section className="card today">
+          <h2>{t.todayRoutine}</h2>
+          <select aria-label={t.todayRoutine} value={selectedRoutine} onChange={(e) => setChosen(e.target.value)}>
+            {routines.filter((r) => r.active).map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+          </select>
+          <button onClick={() => startRoutine(selectedRoutine)}>{t.start}</button>
+          <p className="muted">{t.freeWorkoutHint}</p>
+        </section>
+      )}
 
       <label className="field">
         {t.date}
@@ -203,6 +247,7 @@ export default function WorkoutPage() {
           <section key={ex.exercise_id} className={ex.superset ? 'card superset' : 'card'}>
             {ex.superset && <p className="tag">{t.superset} {ex.superset}</p>}
             <h2>{info?.name}</h2>
+            {repTarget(ex) && <p className="muted">{t.target}: {ex.sets.length} × {repTarget(ex)} {t.reps.toLowerCase()}</p>}
             {info?.notes && <p className="muted">{info.notes}</p>}
             <div className="actions compact">
               <select aria-label={t.tempo} value={ex.tempo ?? ''}
@@ -245,7 +290,7 @@ export default function WorkoutPage() {
                       onChange={() => {
                         const next = toggleDone(s, p)
                         update(next)
-                        if (next.done) startRest()
+                        if (next.done) startRest(ex.rest_s ?? REST_S)
                       }} />
                   </Fragment>
                 )
