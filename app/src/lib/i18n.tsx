@@ -143,6 +143,14 @@ const es = {
   moveUp: 'Subir',
   moveDown: 'Bajar',
   confirmDeleteRoutine: '¿Borrar esta rutina y su receta? Las sesiones ya hechas se conservan.',
+  recipe: 'Receta',
+  recipe_target_sets: 'Series',
+  recipe_rep_min: 'Reps mín.',
+  recipe_rep_max: 'Reps máx.',
+  recipe_rest_s: 'Descanso (s)',
+  defaultSetType: 'Tipo de serie',
+  invalidRecipe: 'Revisá los números: series y reps mayores a 0, descanso en segundos, todos enteros.',
+  invalidRepRange: 'El mínimo de reps no puede ser mayor que el máximo.',
   confirmDeleteEntry: '¿Borrar este registro? No se puede deshacer.',
 }
 
@@ -291,6 +299,14 @@ const en: Texts = {
   moveUp: 'Move up',
   moveDown: 'Move down',
   confirmDeleteRoutine: 'Delete this routine and its recipe? Past workouts are kept.',
+  recipe: 'Recipe',
+  recipe_target_sets: 'Sets',
+  recipe_rep_min: 'Min reps',
+  recipe_rep_max: 'Max reps',
+  recipe_rest_s: 'Rest (s)',
+  defaultSetType: 'Set type',
+  invalidRecipe: 'Check the numbers: sets and reps above 0, rest in seconds, all whole numbers.',
+  invalidRepRange: 'Min reps cannot be greater than max reps.',
   confirmDeleteEntry: 'Delete this entry? This cannot be undone.',
 }
 

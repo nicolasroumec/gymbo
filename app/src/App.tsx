@@ -13,6 +13,7 @@ import MorePage from './pages/MorePage'
 import MuscleGroupsPage from './pages/MuscleGroupsPage'
 import ActivityTypesPage from './pages/ActivityTypesPage'
 import RoutinesPage from './pages/RoutinesPage'
+import RoutineFormPage from './pages/RoutineFormPage'
 import ExercisesPage from './pages/ExercisesPage'
 import ExerciseFormPage from './pages/ExerciseFormPage'
 
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="mas/grupos" element={<MuscleGroupsPage />} />
           <Route path="mas/actividades" element={<ActivityTypesPage />} />
           <Route path="mas/rutinas" element={<RoutinesPage />} />
+          <Route path="mas/rutinas/:id" element={<RoutineFormPage />} />
           <Route path="mas/ejercicios" element={<ExercisesPage />} />
           <Route path="mas/ejercicios/nuevo" element={<ExerciseFormPage />} />
           <Route path="mas/ejercicios/:id" element={<ExerciseFormPage />} />

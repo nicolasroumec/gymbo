@@ -5,7 +5,7 @@ Rama: `feat/routines`.
 
 - [x] **`feat: add routines page with cycle order`**
   `RoutinesPage`: lista, alta, archivo, reordenar el ciclo.
-- [ ] **`feat: add routine recipe form`**
+- [x] **`feat: add routine recipe form`**
   `RoutineFormPage`: ejercicios en orden, series objetivo, rango de reps, tipo por defecto, descanso, superseries.
 - [ ] **`feat: add training cycle logic`**
   `lib/cycle.ts` y test.

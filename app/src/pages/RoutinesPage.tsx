@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n, type Texts } from '../lib/i18n'
 import { moveItem, positionChanges } from '../lib/routines'
@@ -68,6 +69,7 @@ export default function RoutinesPage() {
           <li key={r.id} className={r.active ? undefined : 'archived'}>
             {/* defaultValue = input no controlado: si la base rechaza el cambio, lo escrito queda para corregirlo */}
             <input defaultValue={r.name} aria-label={t.name} onBlur={(e) => rename(r, e.target.value)} />
+            <Link to={r.id} className="button secondary">{t.recipe}</Link>
             <button type="button" className="secondary" aria-label={`${t.moveUp}: ${r.name}`} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
             <button type="button" className="secondary" aria-label={`${t.moveDown}: ${r.name}`} disabled={i === routines.length - 1} onClick={() => move(i, 1)}>↓</button>
             <button type="button" className="secondary" onClick={() => run(supabase.from('routines').update({ active: !r.active }).eq('id', r.id))}>
