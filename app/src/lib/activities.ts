@@ -1,5 +1,5 @@
 import type { Lang, Texts } from './i18n'
-import { parseDecimal } from './numbers'
+import { parseDecimal, parseWholeNumber } from './numbers'
 
 // Campos que puede pedir un tipo de actividad: mismos nombres que las columnas de activities y que el check de activity_types.fields.
 export const ACTIVITY_FIELDS = ['minutes', 'km', 'rounds', 'work_s', 'rest_s', 'jumps', 'best_streak'] as const
@@ -39,7 +39,7 @@ export function readActivity(
   for (const f of ACTIVITY_FIELDS) {
     const text = (form[f] ?? '').trim()
     if (!fields.includes(f) || !text) continue
-    const n = DECIMAL_FIELDS.includes(f) ? parseDecimal(text) : /^\d+$/.test(text) ? Number(text) : null
+    const n = DECIMAL_FIELDS.includes(f) ? parseDecimal(text) : parseWholeNumber(text)
     if (n === null) return { error: 'invalidActivity' }
     values[f] = n
   }

@@ -7,7 +7,13 @@ Rama: `feat/activities-body`.
   `ActivityTypesPage` en Más: alta, edición, archivo, campos por tipo, cargar los sugeridos.
 - [x] **`feat: register activities by type`**
   `RegisterPage` muestra los campos del tipo elegido; tiempo total de soga calculado en `lib/` con test.
-- [ ] **`feat: register body weight and daily steps`**
-- [ ] **`docs: close increment 3`**
+- [x] **`feat: register body weight and daily steps`**
+- [x] **`docs: close increment 3`**
 
-👤 Antes del cierre: una semana completa registrada solo en la app.
+👤 Pendiente: una semana completa registrada solo en la app. Cuando se cumpla, tildar el criterio en la especificación y sacar "(falta la semana de prueba)" de la tabla Estado.
+
+**Decidido en el camino:**
+- Tiempo de soga: salto = rondas × trabajo; total = salto + (rondas − 1) × descanso.
+- Sin pantalla de edición: los últimos registros se borran y se vuelven a cargar.
+- Las actividades no aparecen en Historial; se ven en las estadísticas (incremento 5).
+- Se sumaron a la especificación las reglas de variantes de ejercicios y de peso de mancuernas.

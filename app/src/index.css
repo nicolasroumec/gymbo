@@ -483,3 +483,14 @@ h2 {
 .entries .muted {
   font-size: 14px;
 }
+
+/* Formulario de un campo + botón en una línea (peso, pasos) */
+.inline {
+  display: flex;
+  gap: 8px;
+}
+
+.inline input {
+  flex: 1;
+  min-width: 0;
+}
