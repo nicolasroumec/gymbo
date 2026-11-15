@@ -125,6 +125,16 @@ const es = {
   field_rest_s: 'Descanso (s)',
   field_jumps: 'Saltos',
   field_best_streak: 'Mejor tanda',
+  activity: 'Actividad',
+  chooseActivity: 'Elegí la actividad',
+  activityNotes: 'Nota (opcional)',
+  activitySaved: 'Guardado.',
+  invalidActivity: 'Revisá los números: minutos y km aceptan decimales; el resto, enteros.',
+  jumpTime: 'Salto',
+  totalTime: 'Total',
+  recentEntries: 'Últimos registros',
+  noActivityTypes: 'Todavía no hay tipos de actividad: cargalos en Más.',
+  confirmDeleteEntry: '¿Borrar este registro? No se puede deshacer.',
 }
 
 export type Texts = typeof es
@@ -254,6 +264,16 @@ const en: Texts = {
   field_rest_s: 'Rest (s)',
   field_jumps: 'Jumps',
   field_best_streak: 'Best streak',
+  activity: 'Activity',
+  chooseActivity: 'Choose the activity',
+  activityNotes: 'Note (optional)',
+  activitySaved: 'Saved.',
+  invalidActivity: 'Check the numbers: minutes and km accept decimals; the rest, whole numbers.',
+  jumpTime: 'Jumping',
+  totalTime: 'Total',
+  recentEntries: 'Recent entries',
+  noActivityTypes: 'No activity types yet: add them in More.',
+  confirmDeleteEntry: 'Delete this entry? This cannot be undone.',
 }
 
 export type Lang = 'es' | 'en'

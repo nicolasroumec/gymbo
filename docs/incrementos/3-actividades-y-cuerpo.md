@@ -5,7 +5,7 @@ Rama: `feat/activities-body`.
 
 - [x] **`feat: add activity types page`**
   `ActivityTypesPage` en Más: alta, edición, archivo, campos por tipo, cargar los sugeridos.
-- [ ] **`feat: register activities by type`**
+- [x] **`feat: register activities by type`**
   `RegisterPage` muestra los campos del tipo elegido; tiempo total de soga calculado en `lib/` con test.
 - [ ] **`feat: register body weight and daily steps`**
 - [ ] **`docs: close increment 3`**

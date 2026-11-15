@@ -75,7 +75,7 @@ Diez tablas y una vista. La unidad mínima es la **serie**: una fila por serie, 
 | `workouts` | date, routine_id (opcional), notes | Una sesión real. Sin rutina = sesión libre |
 | `workout_sets` | workout_id, exercise_id, position, set_number, reps, seconds, weight_kg, set_type, tempo, superset_group, notes | Una fila por serie. `reps` o `seconds`, nunca ambos vacíos (check constraint). |
 | `activity_types` | name, fields, archived | Lista editable de actividades (Fútbol, Pádel, Bici, Soga...). `fields text[]` = qué campos pide al cargar, entre `minutes`, `km`, `rounds`, `work_s`, `rest_s`, `jumps`, `best_streak`. Nombre único por usuario |
-| `activities` | date, activity_type_id, minutes, km, rounds, work_s, rest_s, jumps, best_streak, notes | Todos los campos opcionales; la pantalla muestra solo los `fields` del tipo. Soga: `rounds` × (`work_s` + `rest_s`). Borrar un tipo con actividades está bloqueado (`on delete restrict`) |
+| `activities` | date, activity_type_id, minutes, km, rounds, work_s, rest_s, jumps, best_streak, notes | Todos los campos opcionales; la pantalla muestra solo los `fields` del tipo. Soga: tiempo de salto = `rounds` × `work_s`; total = salto + (`rounds` − 1) × `rest_s` (después de la última ronda no hay descanso). Borrar un tipo con actividades está bloqueado (`on delete restrict`) |
 | `body_weights` | date, kg | Pesajes |
 | `daily_steps` | date, steps | Único por usuario y fecha |
 | `personal_records` | vista (pendiente) | Desde `workout_sets`: mejor peso, mejor 1RM estimado y más reps por ejercicio. Hasta el incremento 5 los récords se calculan en `lib/records.ts` |

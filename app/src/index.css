@@ -440,3 +440,46 @@ form.rows {
 .rows .fields input {
   flex: none;
 }
+
+h2 {
+  font-size: 18px;
+  margin: 24px 0 12px;
+}
+
+/* Formulario en columna */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stack .field {
+  margin: 0;
+}
+
+/* Campos numéricos de a dos por fila */
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Registros recientes: texto a la izquierda, acción a la derecha */
+.entries {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.entries li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.entries .muted {
+  font-size: 14px;
+}
