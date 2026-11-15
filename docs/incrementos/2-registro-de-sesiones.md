@@ -5,7 +5,7 @@ Rama: `feat/workout-logging`.
 
 - [x] **`feat: add set notation parser`**
   `lib/sets.ts` (`parse` y `format`) con la tabla de ejemplos como tests e ida y vuelta.
-- [ ] **`feat: add previous sets lookup`**
+- [x] **`feat: add previous sets lookup`**
   `lib/previous.ts` y test.
 - [ ] **`feat: add personal record detection`**
   `lib/records.ts` y test.
