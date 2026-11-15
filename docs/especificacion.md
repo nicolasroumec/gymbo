@@ -7,8 +7,8 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 | Incremento | Estado |
 | --- | --- |
 | 0. Base | Terminado |
-| 1. Catálogo de ejercicios | En curso |
-| 2. Registro de sesiones | Pendiente |
+| 1. Catálogo de ejercicios | Terminado |
+| 2. Registro de sesiones | Terminado |
 | 3. Actividades y cuerpo | Pendiente |
 | 4. Importador de Excels | Pendiente |
 | 5. Estadísticas | Pendiente |
@@ -78,7 +78,7 @@ Diez tablas y una vista. La unidad mínima es la **serie**: una fila por serie, 
 | `activities` | date, activity_type_id, minutes, km, rounds, work_s, rest_s, jumps, best_streak, notes | Todos los campos opcionales; la pantalla muestra solo los `fields` del tipo. Soga: `rounds` × (`work_s` + `rest_s`). Borrar un tipo con actividades está bloqueado (`on delete restrict`) |
 | `body_weights` | date, kg | Pesajes |
 | `daily_steps` | date, steps | Único por usuario y fecha |
-| `personal_records` | vista | Desde `workout_sets`: mejor peso, mejor 1RM estimado y más reps por ejercicio |
+| `personal_records` | vista (pendiente) | Desde `workout_sets`: mejor peso, mejor 1RM estimado y más reps por ejercicio. Hasta el incremento 5 los récords se calculan en `lib/records.ts` |
 
 **Reglas comunes:**
 
@@ -101,7 +101,7 @@ Tomado de Hevy, Strong y Liftosaur. Cada ejercicio de la sesión es una tarjeta 
 - **Tipo de serie:** tocando el número de serie se elige `C` calentamiento, `D` drop, `F` fallo, `RP` rest-pause. Va por serie, no por ejercicio.
 - **Atajo de notación:** un campo de texto por ejercicio acepta la notación del Excel (`8-6-4 x 20`) y rellena la grilla. Al editar, la grilla se puede ver como texto con `format`.
 - **Al tildar ✓:** arranca el temporizador de descanso (`rest_s` de la receta, 90 s si no hay; ±15 s), y si la serie supera un récord se marca 🏆 en el momento.
-- **Nota fija** del ejercicio (`exercises.notes`) arriba de la grilla; **nota de la serie** en `workout_sets.notes`.
+- **Nota fija** del ejercicio (`exercises.notes`) arriba de la grilla; **nota de la serie** en `workout_sets.notes` (pendiente: no entra en 360 px, se verá en el incremento 8).
 - **Teclado:** inputs con `inputMode="decimal"` (kg) y `"numeric"` (reps) para que el celular abra el teclado numérico.
 
 ## Notación de series y tipos de serie
@@ -120,7 +120,7 @@ Atajo de carga (ver arriba) y formato del importador: una línea por ejercicio; 
 Ida y vuelta obligatoria: `format(parse(x))` devuelve la forma canónica de `x` (por ejemplo `8-8-` vuelve como `8-8`).
 
 **Tipos de serie** (`set_type`), uno por serie: `normal` (por defecto), `warmup` = calentamiento (no cuenta para récords ni progresión), `drop`, `rest_pause`, `failure` = fallo.
-**Tempo** (`tempo`): `slow` = lento, `explosive` = explosivo, `pause` = pausa. Reemplaza los "(lento)", "(aguantando)", "(explosiva)" que el Excel ponía en el nombre.
+**Tempo** (`tempo`): `slow` = lento, `explosive` = explosivo, `pause` = pausa. Reemplaza los "(lento)", "(aguantando)", "(explosiva)" que el Excel ponía en el nombre. En la pantalla de carga se elige por ejercicio y se guarda en cada serie.
 **Equipo** (`exercises.equipment`): `barbell` = barra, `dumbbell` = mancuerna, `machine` = máquina, `cable` = polea, `bodyweight` = peso corporal, `other` = otro.
 **Superserie** (`superset_group`): ejercicios con el mismo número dentro de la sesión se muestran juntos.
 
@@ -177,7 +177,7 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - `lib/video.ts`: arma el link de YouTube con el minuto (`?t=`) y descarta links que no sean `http(s)`. Test.
 - `lib/numbers.ts`: lectura de decimales con coma o punto, compartida por todos los formularios. Test.
 - `lib/exercises.ts`: búsqueda y filtro del catálogo. Test.
-- [ ] Están cargados los ejercicios de la rutina actual.
+- [x] Están cargados los ejercicios de la rutina actual.
 
 ### 2. Registro de sesiones
 - `lib/sets.ts`: `parse` y `format` de la notación, con la tabla de ejemplos como tests e ida y vuelta.
@@ -185,9 +185,9 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - `lib/records.ts`: dada una serie y los récords actuales, dice si es récord (peso, 1RM estimado o reps con ese peso); ignora calentamiento. Test.
 - `lib/draft.ts`: guardar y recuperar la sesión en curso en localStorage; se borra solo cuando Supabase confirma el guardado. Test.
 - `WorkoutPage`: grilla de la **Pantalla de carga**, selector de ejercicio con búsqueda, tipo de serie, tempo, superserie, temporizador de descanso, aviso 🏆, nota fija del ejercicio.
-- "Repetir la última sesión de esta rutina".
+- "Repetir" una sesión pasada desde el historial (la última de una rutina llega con el incremento 6).
 - `HistoryPage` y detalle de sesión: lista por fecha, editar y borrar.
-- [ ] Se anota una sesión real en el gym desde el celular sin usar el Excel.
+- [x] Se anota una sesión real en el gym desde el celular sin usar el Excel.
 
 ### 3. Actividades y cuerpo
 - `ActivityTypesPage` (en Más): alta, edición y archivo de tipos, eligiendo qué campos pide cada uno. Si la lista está vacía, ofrece cargar Fútbol, Pádel, HIIT, Bici, Movilidad, Running y Soga.
@@ -224,6 +224,7 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - Dependencia nueva: `vite-plugin-pwa`, prevista en el stack. Ícono, nombre Gymbo, pantalla completa, caché de la app.
 - `lib/export.ts`: todas las tablas a JSON y a CSV. Test.
 - Pantalla Exportar en Más.
+- Nota por serie (`workout_sets.notes`) en la pantalla de carga, sin romper la grilla en 360 px.
 - README de portfolio: capturas o GIF con datos inventados, decisiones técnicas (RLS, una fila por serie, lógica pura testeada).
 - [ ] Se usa como app del teléfono y hay un respaldo descargado.
 
