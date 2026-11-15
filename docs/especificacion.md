@@ -9,7 +9,7 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 | 0. Base | Terminado |
 | 1. Catálogo de ejercicios | Terminado |
 | 2. Registro de sesiones | Terminado |
-| 3. Actividades y cuerpo | Pendiente |
+| 3. Actividades y cuerpo | Terminado (falta la semana de prueba) |
 | 4. Importador de Excels | Pendiente |
 | 5. Estadísticas | Pendiente |
 | 6. Planes y splits | Pendiente |
@@ -75,7 +75,7 @@ Diez tablas y una vista. La unidad mínima es la **serie**: una fila por serie, 
 | `workouts` | date, routine_id (opcional), notes | Una sesión real. Sin rutina = sesión libre |
 | `workout_sets` | workout_id, exercise_id, position, set_number, reps, seconds, weight_kg, set_type, tempo, superset_group, notes | Una fila por serie. `reps` o `seconds`, nunca ambos vacíos (check constraint). |
 | `activity_types` | name, fields, archived | Lista editable de actividades (Fútbol, Pádel, Bici, Soga...). `fields text[]` = qué campos pide al cargar, entre `minutes`, `km`, `rounds`, `work_s`, `rest_s`, `jumps`, `best_streak`. Nombre único por usuario |
-| `activities` | date, activity_type_id, minutes, km, rounds, work_s, rest_s, jumps, best_streak, notes | Todos los campos opcionales; la pantalla muestra solo los `fields` del tipo. Soga: `rounds` × (`work_s` + `rest_s`). Borrar un tipo con actividades está bloqueado (`on delete restrict`) |
+| `activities` | date, activity_type_id, minutes, km, rounds, work_s, rest_s, jumps, best_streak, notes | Todos los campos opcionales; la pantalla muestra solo los `fields` del tipo. Soga: tiempo de salto = `rounds` × `work_s`; total = salto + (`rounds` − 1) × `rest_s` (después de la última ronda no hay descanso). Borrar un tipo con actividades está bloqueado (`on delete restrict`) |
 | `body_weights` | date, kg | Pesajes |
 | `daily_steps` | date, steps | Único por usuario y fecha |
 | `personal_records` | vista (pendiente) | Desde `workout_sets`: mejor peso, mejor 1RM estimado y más reps por ejercicio. Hasta el incremento 5 los récords se calculan en `lib/records.ts` |
@@ -123,6 +123,8 @@ Ida y vuelta obligatoria: `format(parse(x))` devuelve la forma canónica de `x` 
 **Tempo** (`tempo`): `slow` = lento, `explosive` = explosivo, `pause` = pausa. Reemplaza los "(lento)", "(aguantando)", "(explosiva)" que el Excel ponía en el nombre. En la pantalla de carga se elige por ejercicio y se guarda en cada serie.
 **Equipo** (`exercises.equipment`): `barbell` = barra, `dumbbell` = mancuerna, `machine` = máquina, `cable` = polea, `bodyweight` = peso corporal, `other` = otro.
 **Superserie** (`superset_group`): ejercicios con el mismo número dentro de la sesión se muestran juntos.
+**Variantes:** cada variante es un ejercicio aparte, con la variante en el nombre: movimiento primero y variante al final ("Press militar con barra", "Press militar con mancuernas"). Así cada una tiene su Anterior, sus récords y su salto de peso, que no se pueden comparar entre equipos. La que no se usa se archiva y conserva su historial. Renombrar un ejercicio cambia el nombre en todo el historial, porque las series apuntan al id.
+**Mancuernas:** se anota el peso de una mancuerna, no la suma de las dos.
 
 ## Plan de incrementos
 
@@ -192,7 +194,8 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 ### 3. Actividades y cuerpo
 - `ActivityTypesPage` (en Más): alta, edición y archivo de tipos, eligiendo qué campos pide cada uno. Si la lista está vacía, ofrece cargar Fútbol, Pádel, HIIT, Bici, Movilidad, Running y Soga.
 - `RegisterPage` (pestaña Registrar): cargar la actividad del día con los campos de su tipo; peso corporal; pasos.
-- Soga: rondas, segundos de salto y de descanso; muestra el tiempo total calculado.
+- Soga: rondas, segundos de salto y de descanso; muestra el tiempo de salto y el total calculados.
+- Una sola fecha arriba vale para actividad, peso y pasos. Debajo de cada formulario, los últimos registros con borrar (editar = borrar y volver a cargar). Pasos: uno por día; cargar de nuevo la misma fecha lo reemplaza.
 - [ ] Una semana completa (gym, fútbol, soga, peso) registrada solo en la app.
 
 ### 4. Importador de Excels

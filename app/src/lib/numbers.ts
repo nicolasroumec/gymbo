@@ -4,3 +4,9 @@ export function parseDecimal(input: string): number | null {
   if (!/^(\d+\.?\d*|\.\d+)$/.test(s)) return null
   return Number(s)
 }
+
+// Entero no negativo ("10000"). Vacío, decimal o inválido = null.
+export function parseWholeNumber(input: string): number | null {
+  const s = input.trim()
+  return /^\d+$/.test(s) ? Number(s) : null
+}

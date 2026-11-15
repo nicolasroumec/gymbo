@@ -11,6 +11,7 @@ import WorkoutDetailPage from './pages/WorkoutDetailPage'
 import StatsPage from './pages/StatsPage'
 import MorePage from './pages/MorePage'
 import MuscleGroupsPage from './pages/MuscleGroupsPage'
+import ActivityTypesPage from './pages/ActivityTypesPage'
 import ExercisesPage from './pages/ExercisesPage'
 import ExerciseFormPage from './pages/ExerciseFormPage'
 
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="estadisticas" element={<StatsPage />} />
           <Route path="mas" element={<MorePage />} />
           <Route path="mas/grupos" element={<MuscleGroupsPage />} />
+          <Route path="mas/actividades" element={<ActivityTypesPage />} />
           <Route path="mas/ejercicios" element={<ExercisesPage />} />
           <Route path="mas/ejercicios/nuevo" element={<ExerciseFormPage />} />
           <Route path="mas/ejercicios/:id" element={<ExerciseFormPage />} />
