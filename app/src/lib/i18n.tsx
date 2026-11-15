@@ -104,6 +104,15 @@ const es = {
   notationExample: 'Ej.: 8-6-4 x 20',
   apply: 'Aplicar',
   invalidNotation: 'No entendí las series. Ejemplos: 8-6-4 x 20, 10 x 32 7 x 37, 35s-30s.',
+  rest: 'Descanso',
+  skip: 'Saltar',
+  newRecord: 'Récord nuevo',
+  editWorkout: 'Editar sesión',
+  cancelEdit: 'Cancelar edición',
+  edit: 'Editar',
+  noWorkouts: 'Todavía no hay sesiones guardadas.',
+  confirmDeleteWorkout: '¿Borrar esta sesión y todas sus series? No se puede deshacer.',
+  confirmReplaceDraft: 'Hay una sesión en curso sin guardar. ¿Reemplazarla por esta?',
 }
 
 export type Texts = typeof es
@@ -212,6 +221,15 @@ const en: Texts = {
   notationExample: 'E.g. 8-6-4 x 20',
   apply: 'Apply',
   invalidNotation: 'Could not read the sets. Examples: 8-6-4 x 20, 10 x 32 7 x 37, 35s-30s.',
+  rest: 'Rest',
+  skip: 'Skip',
+  newRecord: 'New record',
+  editWorkout: 'Edit workout',
+  cancelEdit: 'Cancel editing',
+  edit: 'Edit',
+  noWorkouts: 'No saved workouts yet.',
+  confirmDeleteWorkout: 'Delete this workout and all its sets? This cannot be undone.',
+  confirmReplaceDraft: 'There is an unsaved workout in progress. Replace it with this one?',
 }
 
 export type Lang = 'es' | 'en'

@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import WorkoutPage from './pages/WorkoutPage'
 import RegisterPage from './pages/RegisterPage'
 import HistoryPage from './pages/HistoryPage'
+import WorkoutDetailPage from './pages/WorkoutDetailPage'
 import StatsPage from './pages/StatsPage'
 import MorePage from './pages/MorePage'
 import MuscleGroupsPage from './pages/MuscleGroupsPage'
@@ -33,6 +34,7 @@ export default function App() {
           <Route index element={<WorkoutPage />} />
           <Route path="registrar" element={<RegisterPage />} />
           <Route path="historial" element={<HistoryPage />} />
+          <Route path="historial/:id" element={<WorkoutDetailPage />} />
           <Route path="estadisticas" element={<StatsPage />} />
           <Route path="mas" element={<MorePage />} />
           <Route path="mas/grupos" element={<MuscleGroupsPage />} />

@@ -390,3 +390,31 @@ form.rows {
   min-width: 0;
   background: var(--bg);
 }
+
+/* Temporizador de descanso: barra fija sobre las pestañas */
+.rest {
+  position: fixed;
+  inset: auto 0 var(--tabs-h);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.rest span {
+  flex: 1;
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rest button {
+  padding: 8px 12px;
+}
+
+/* Lugar para que la barra no tape los últimos botones */
+.rest-spacer {
+  height: 64px;
+}

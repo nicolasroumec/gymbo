@@ -3,13 +3,18 @@ import { supabase } from '../lib/supabase'
 import { useI18n, type Texts } from '../lib/i18n'
 import { filterExercises } from '../lib/exercises'
 import {
-  draftToRows, emptySet, groupSupersets, loadDraft, nextSetType, saveDraft, setsFromNotation, setsToNotation, setText,
+  draftToRows, emptySet, groupSupersets, loadDraft, nextSetType, readSet, saveDraft, setsFromNotation, setsToNotation, setText,
   TEMPOS, toggleDone,
   type Draft, type DraftExercise, type DraftSet, type SetType, type Tempo,
 } from '../lib/draft'
 import { previousSets, type PastSet } from '../lib/previous'
+import { sessionRecords, type RecordSet } from '../lib/records'
 import { format, parse } from '../lib/sets'
+import { formatTimestamp } from '../lib/video'
 import type { Tables } from '../lib/database.types'
+
+// Sin receta todavía: el descanso por ejercicio (routine_exercises.rest_s) llega con las rutinas, en el incremento 6.
+const REST_S = 90
 
 const newDraft = (): Draft => ({
   workout_id: crypto.randomUUID(),
@@ -34,11 +39,41 @@ async function fetchPast(exerciseId: string, workoutId: string): Promise<PastSet
   )
 }
 
+type RecordRow = RecordSet & { exercise_id: string }
+
+// Todas las series efectivas de un ejercicio, para los récords. Paginado: Supabase devuelve hasta 1000 filas por consulta.
+async function fetchRecordSets(exerciseId: string, workoutId: string): Promise<RecordRow[] | null> {
+  const rows: RecordRow[] = []
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from('workout_sets')
+      .select('exercise_id, reps, weight_kg, set_type')
+      .eq('exercise_id', exerciseId)
+      .neq('workout_id', workoutId)
+      .neq('set_type', 'warmup')
+      .not('reps', 'is', null)
+      .order('id')
+      .range(from, from + 999)
+    if (error) return null
+    rows.push(...data)
+    if (data.length < 1000) return rows
+  }
+}
+
+// "Anterior" y récords de un ejercicio, sin contar la sesión que se está cargando. null = error de red.
+async function fetchHistory(exerciseId: string, workoutId: string) {
+  const [past, records] = await Promise.all([fetchPast(exerciseId, workoutId), fetchRecordSets(exerciseId, workoutId)])
+  return past && records ? { past, records } : null
+}
+
 export default function WorkoutPage() {
   const { t } = useI18n()
   const [draft, setDraft] = useState<Draft>(() => loadDraft() ?? newDraft())
   const [catalog, setCatalog] = useState<Tables<'exercises'>[]>([])
   const [past, setPast] = useState<PastSet[]>([])
+  const [records, setRecords] = useState<RecordRow[]>([])
+  const [restEnd, setRestEnd] = useState<number | null>(null) // hora (ms) en que termina el descanso
+  const [now, setNow] = useState(() => Date.now())
   const [query, setQuery] = useState('')
   const [message, setMessage] = useState<keyof Texts | null>(null)
   const [saving, setSaving] = useState(false)
@@ -49,12 +84,32 @@ export default function WorkoutPage() {
   // Solo al abrir: después cada ejercicio trae su historial al agregarlo.
   useEffect(() => {
     supabase.from('exercises').select().then(({ data, error }) => (error ? setMessage('loadError') : setCatalog(data)))
-    Promise.all(draft.exercises.map((e) => fetchPast(e.exercise_id, draft.workout_id))).then((results) => {
+    Promise.all(draft.exercises.map((e) => fetchHistory(e.exercise_id, draft.workout_id))).then((results) => {
       if (results.includes(null)) setMessage('loadError')
-      setPast(results.flatMap((r) => r ?? []))
+      setPast(results.flatMap((r) => r?.past ?? []))
+      setRecords(results.flatMap((r) => r?.records ?? []))
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- a propósito: solo al montar
   }, [])
+
+  // Temporizador: se refresca 4 veces por segundo mientras corre; al terminar vibra (si el celular puede).
+  useEffect(() => {
+    if (restEnd === null) return
+    const id = setInterval(() => {
+      const time = Date.now()
+      setNow(time)
+      if (time >= restEnd) {
+        navigator.vibrate?.(300)
+        setRestEnd(null)
+      }
+    }, 250)
+    return () => clearInterval(id)
+  }, [restEnd])
+
+  function startRest() {
+    setNow(Date.now())
+    setRestEnd(Date.now() + REST_S * 1000)
+  }
 
   const previous = previousSets(past, null)
   const added = new Set(draft.exercises.map((e) => e.exercise_id))
@@ -62,11 +117,12 @@ export default function WorkoutPage() {
 
   async function addExercise(id: string) {
     setQuery('')
-    const rows = await fetchPast(id, draft.workout_id)
-    if (!rows) setMessage('loadError')
-    setPast((p) => [...p, ...(rows ?? [])])
+    const history = await fetchHistory(id, draft.workout_id)
+    if (!history) setMessage('loadError')
+    setPast((p) => [...p, ...(history?.past ?? [])])
+    setRecords((r) => [...r, ...(history?.records ?? [])])
     // Arranca con las filas de la vez anterior y sus tipos (el calentamiento vuelve a ser C). set_type viene validado por la base.
-    const prevSets = previousSets(rows ?? [], null).get(id) ?? []
+    const prevSets = previousSets(history?.past ?? [], null).get(id) ?? []
     const sets = prevSets.length ? prevSets.map((p) => emptySet(p.set_type as SetType)) : [emptySet()]
     setDraft((d) => ({ ...d, exercises: [...d.exercises, { exercise_id: id, sets }] }))
   }
@@ -95,6 +151,8 @@ export default function WorkoutPage() {
     if (!confirm(t.confirmDiscard)) return
     setDraft(newDraft())
     setPast([])
+    setRecords([])
+    setRestEnd(null)
     setMessage(null)
   }
 
@@ -113,12 +171,14 @@ export default function WorkoutPage() {
     // Recién con el OK de Supabase se reemplaza el borrador.
     setDraft(newDraft())
     setPast([])
+    setRecords([])
+    setRestEnd(null)
     setMessage('workoutSaved')
   }
 
   return (
     <>
-      <h1>{t.workout}</h1>
+      <h1>{draft.editing ? t.editWorkout : t.workout}</h1>
       {message &&
         (message === 'workoutSaved' ? (
           <p role="status" className="success">{t.workoutSaved}</p>
@@ -134,6 +194,11 @@ export default function WorkoutPage() {
       {draft.exercises.map((ex, i) => {
         const info = catalog.find((c) => c.id === ex.exercise_id)
         const prev = previous.get(ex.exercise_id) ?? []
+        const exRecords = records.filter((r) => r.exercise_id === ex.exercise_id)
+        const isRecord = sessionRecords(exRecords, ex.sets.map((s) => {
+          const values = s.done ? readSet(s) : null
+          return values && { ...values, set_type: s.set_type ?? 'normal' }
+        }))
         return (
           <section key={ex.exercise_id} className={ex.superset ? 'card superset' : 'card'}>
             {ex.superset && <p className="tag">{t.superset} {ex.superset}</p>}
@@ -168,13 +233,20 @@ export default function WorkoutPage() {
                       onClick={() => update({ ...s, set_type: nextSetType(type) })}>
                       {type === 'normal' ? j + 1 : t[`setShort_${type}`]}
                     </button>
-                    <span className="muted">{!p ? '–' : pv.kg ? `${pv.kg} × ${pv.reps}` : pv.reps}</span>
+                    <span className="muted">
+                      {isRecord[j] && <span role="img" aria-label={t.newRecord}>🏆 </span>}
+                      {!p ? '–' : pv.kg ? `${pv.kg} × ${pv.reps}` : pv.reps}
+                    </span>
                     <input inputMode="decimal" aria-label={`${t.kg} ${j + 1}`} placeholder={pv.kg} value={s.kg}
                       onChange={(e) => update({ ...s, kg: e.target.value })} />
                     <input inputMode="numeric" aria-label={`${t.reps} ${j + 1}`} placeholder={pv.reps} value={s.reps}
                       onChange={(e) => update({ ...s, reps: e.target.value })} />
                     <input type="checkbox" aria-label={`${t.done} ${j + 1}`} checked={s.done}
-                      onChange={() => update(toggleDone(s, p))} />
+                      onChange={() => {
+                        const next = toggleDone(s, p)
+                        update(next)
+                        if (next.done) startRest()
+                      }} />
                   </Fragment>
                 )
               })}
@@ -207,8 +279,22 @@ export default function WorkoutPage() {
 
       <div className="actions">
         <button onClick={save} disabled={saving}>{saving ? t.saving : t.saveWorkout}</button>
-        {draft.exercises.length > 0 && <button className="secondary" onClick={discard}>{t.discardWorkout}</button>}
+        {(draft.exercises.length > 0 || draft.editing) && (
+          <button className="secondary" onClick={discard}>{draft.editing ? t.cancelEdit : t.discardWorkout}</button>
+        )}
       </div>
+
+      {restEnd !== null && (
+        <>
+          <div className="rest-spacer" />
+          <div className="rest" role="timer">
+            <span>{t.rest} {formatTimestamp(Math.max(0, Math.ceil((restEnd - now) / 1000)))}</span>
+            <button className="secondary" onClick={() => setRestEnd((e) => e && e - 15_000)}>−15</button>
+            <button className="secondary" onClick={() => setRestEnd((e) => e && e + 15_000)}>+15</button>
+            <button className="secondary" onClick={() => setRestEnd(null)}>{t.skip}</button>
+          </div>
+        </>
+      )}
     </>
   )
 }

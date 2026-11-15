@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  draftToRows, groupSupersets, nextSetType, parseDraft, setsFromNotation, setsToNotation, toggleDone, type Draft, type DraftExercise, type DraftSet,
+  draftToRows, groupSupersets, workoutToDraft, nextSetType, parseDraft, setsFromNotation, setsToNotation, toggleDone, type Draft, type DraftExercise, type DraftSet,
 } from './draft'
 import { format, parse } from './sets'
 import type { PastSet } from './previous'
@@ -118,5 +118,33 @@ describe('atajo de notación', () => {
 
   it('la grilla se ve como texto, salteando filas vacías o inválidas', () => {
     expect(format(setsToNotation([set('20', '8'), set('20', '6', false), set('', ''), set('abc', '5'), set('25', '4')]))).toBe('8-6 x 20 4 x 25')
+  })
+})
+
+describe('workoutToDraft', () => {
+  it('arma una tarjeta por ejercicio, en orden, con sus series tildadas', () => {
+    const base = { reps: 8, seconds: null, weight_kg: 20, set_type: 'normal', tempo: null, superset_group: null }
+    const d = workoutToDraft('w9', '2026-01-08', [
+      { ...base, exercise_id: 'remo', position: 1, set_number: 1 },
+      { ...base, exercise_id: 'press', position: 0, set_number: 2, weight_kg: 22.5, tempo: 'slow', superset_group: 1 },
+      { ...base, exercise_id: 'press', position: 0, set_number: 1, set_type: 'warmup', tempo: 'slow', superset_group: 1 },
+    ])
+    expect(d).toEqual({
+      workout_id: 'w9', date: '2026-01-08', editing: true,
+      exercises: [
+        { exercise_id: 'press', tempo: 'slow', superset: 1, sets: [
+          { kg: '20', reps: '8', done: true, set_type: 'warmup' },
+          { kg: '22,5', reps: '8', done: true, set_type: 'normal' },
+        ] },
+        { exercise_id: 'remo', tempo: null, superset: null, sets: [{ kg: '20', reps: '8', done: true, set_type: 'normal' }] },
+      ],
+    })
+  })
+
+  it('ida y vuelta: guardar el borrador da las mismas filas', () => {
+    const rows = [
+      { exercise_id: 'press', position: 0, set_number: 1, reps: null, seconds: 40, weight_kg: null, set_type: 'normal' as const, tempo: 'pause' as const, superset_group: null },
+    ]
+    expect(draftToRows(workoutToDraft('w9', '2026-01-08', rows))).toEqual({ rows: [{ ...rows[0], workout_id: 'w9' }] })
   })
 })

@@ -15,7 +15,8 @@ export type DraftSet = { kg: string; reps: string; done: boolean; set_type?: Set
 // tempo va por ejercicio (como lo anotaba el Excel) y se guarda en cada serie; superset = mismo número, se muestran juntos.
 export type DraftExercise = { exercise_id: string; sets: DraftSet[]; tempo?: Tempo | null; superset?: number | null }
 // workout_id se genera al empezar: guardar dos veces (reintento tras un corte) pisa la misma sesión.
-export type Draft = { workout_id: string; date: string; exercises: DraftExercise[] }
+// editing = es una sesión ya guardada que se está corrigiendo desde el historial.
+export type Draft = { workout_id: string; date: string; exercises: DraftExercise[]; editing?: boolean }
 
 export const emptySet = (set_type: SetType = 'normal'): DraftSet => ({ kg: '', reps: '', done: false, set_type })
 
@@ -117,4 +118,22 @@ export function draftToRows(draft: Draft): { rows: SetRow[] } | { error: keyof T
     }
   }
   return rows.length ? { rows } : { error: 'noSetsDone' }
+}
+
+// Una serie guardada, tal como viene de workout_sets (los textos ya los valida la base con check).
+export type SavedSet = Omit<SetRow, 'workout_id' | 'set_type' | 'tempo'> & { set_type: string; tempo: string | null }
+
+// Sesión guardada → borrador para editarla con la misma grilla. Cada position es una tarjeta.
+export function workoutToDraft(workout_id: string, date: string, sets: SavedSet[]): Draft {
+  const sorted = [...sets].sort((a, b) => a.position - b.position || a.set_number - b.set_number)
+  const exercises: DraftExercise[] = []
+  let lastPosition: number | null = null
+  for (const s of sorted) {
+    if (s.position !== lastPosition) {
+      exercises.push({ exercise_id: s.exercise_id, tempo: s.tempo as Tempo | null, superset: s.superset_group, sets: [] })
+      lastPosition = s.position
+    }
+    exercises[exercises.length - 1].sets.push({ ...setText(s), done: true, set_type: s.set_type as SetType })
+  }
+  return { workout_id, date, exercises, editing: true }
 }

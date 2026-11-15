@@ -12,9 +12,8 @@ Rama: `feat/workout-logging`.
 - [x] **`feat: add set types, tempo and supersets to workout grid`**
 - [x] **`feat: add notation shortcut to workout grid`**
   Campo de texto por ejercicio que rellena la grilla con `parse`.
-- [ ] **`feat: add rest timer and record alert`**
-- [ ] **`feat: add workout history with edit and delete`**
-  `HistoryPage` y detalle de sesión.
+- [x] **`feat: add rest timer, record alert and workout history`**
+  Temporizador de descanso y 🏆 en la grilla. `HistoryPage` y detalle de sesión con editar y borrar.
 - [ ] **`feat: repeat a past session`**
   Botón "Repetir" en el detalle de una sesión: arma una sesión nueva con sus ejercicios.
 - [ ] **`docs: close increment 2`**

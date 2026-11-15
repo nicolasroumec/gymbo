@@ -45,3 +45,15 @@ export function beatenRecords(set: RecordSet, records: Records): RecordKind[] {
   if (bestReps != null && set.reps > bestReps) kinds.push('reps')
   return kinds
 }
+
+// Para cada serie de la sesión (null = sin tildar o inválida): si supera los récords del historial
+// o de una serie anterior de la misma sesión. Así el 🏆 aparece en el momento de tildar.
+export function sessionRecords(history: RecordSet[], session: (RecordSet | null)[]): boolean[] {
+  const seen = [...history]
+  return session.map((s) => {
+    if (!s) return false
+    const beaten = beatenRecords(s, computeRecords(seen)).length > 0
+    seen.push(s)
+    return beaten
+  })
+}

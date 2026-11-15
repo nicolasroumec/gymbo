@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { beatenRecords, computeRecords, estimateOneRepMax, type RecordSet } from './records'
+import { beatenRecords, computeRecords, estimateOneRepMax, sessionRecords, type RecordSet } from './records'
 
 // Datos inventados.
 const s = (reps: number | null, weight_kg: number | null, set_type = 'normal'): RecordSet => ({ reps, weight_kg, set_type })
@@ -50,5 +50,17 @@ describe('beatenRecords', () => {
   it('sin peso: récord de reps', () => {
     const bodyweight = computeRecords([s(12, null)])
     expect(beatenRecords(s(13, null), bodyweight)).toEqual(['reps'])
+  })
+})
+
+describe('sessionRecords', () => {
+  it('compara cada serie contra el historial y las series anteriores de la sesión', () => {
+    const history = [s(8, 30)]
+    // 9 × 30 supera al historial; el segundo 9 × 30 solo lo iguala; null = sin tildar
+    expect(sessionRecords(history, [s(9, 30), s(9, 30), null, s(10, 30)])).toEqual([true, false, false, true])
+  })
+
+  it('sin historial no hay récords', () => {
+    expect(sessionRecords([], [s(5, 20), s(6, 20)])).toEqual([false, true])
   })
 })
