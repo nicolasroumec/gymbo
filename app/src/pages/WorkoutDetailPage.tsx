@@ -12,18 +12,20 @@ export default function WorkoutDetailPage() {
   const { id } = useParams()
   const [workout, setWorkout] = useState<Draft | null>(null)
   const [names, setNames] = useState(new Map<string, string>())
+  const [routineName, setRoutineName] = useState<string | null>(null)
   const [error, setError] = useState<keyof Texts | null>(null)
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     supabase
       .from('workouts')
-      .select('id, date, workout_sets(exercise_id, position, set_number, reps, seconds, weight_kg, set_type, tempo, superset_group, exercises(name))')
+      .select('id, date, routine_id, routines(name), workout_sets(exercise_id, position, set_number, reps, seconds, weight_kg, set_type, tempo, superset_group, exercises(name))')
       .eq('id', id!)
       .single()
       .then(({ data, error }) => {
         if (error) return setError('loadError')
-        setWorkout(workoutToDraft(data.id, data.date, data.workout_sets))
+        setWorkout(workoutToDraft(data.id, data.date, data.workout_sets, data.routine_id))
+        setRoutineName(data.routines?.name ?? null)
         setNames(new Map(data.workout_sets.map((s) => [s.exercise_id, s.exercises?.name ?? ''])))
       })
   }, [id])
@@ -51,6 +53,7 @@ export default function WorkoutDetailPage() {
     <>
       <h1>{workout ? formatDate(workout.date, lang) : t.workout}</h1>
       {error && <p role="alert" className="error">{t[error]}</p>}
+      {routineName && <p className="muted">{routineName}</p>}
 
       {workout?.exercises.map((ex, i) => {
         const special = ex.sets.flatMap((s, j) => (s.set_type && s.set_type !== 'normal' ? [`${j + 1}: ${t[`setShort_${s.set_type}`]}`] : []))

@@ -4,7 +4,12 @@ import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
 import { exerciseNames, formatDate } from '../lib/history'
 
-type WorkoutItem = { id: string; date: string; workout_sets: { position: number; exercises: { name: string } | null }[] }
+type WorkoutItem = {
+  id: string
+  date: string
+  routines: { name: string } | null
+  workout_sets: { position: number; exercises: { name: string } | null }[]
+}
 
 export default function HistoryPage() {
   const { t, lang } = useI18n()
@@ -13,10 +18,10 @@ export default function HistoryPage() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    // ponytail: últimas 100 sesiones; paginar si el historial importado (incremento 4) lo pide.
+    // ponytail: últimas 100 sesiones; paginar si el historial importado (incremento 5) lo pide.
     supabase
       .from('workouts')
-      .select('id, date, workout_sets(position, exercises(name))')
+      .select('id, date, routines(name), workout_sets(position, exercises(name))')
       .order('date', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(100)
@@ -37,7 +42,7 @@ export default function HistoryPage() {
           <li key={w.id}>
             <Link to={w.id}>
               {formatDate(w.date, lang)}
-              <span className="muted">{exerciseNames(w.workout_sets)}</span>
+              <span className="muted">{[w.routines?.name, exerciseNames(w.workout_sets)].filter(Boolean).join(' — ')}</span>
             </Link>
           </li>
         ))}

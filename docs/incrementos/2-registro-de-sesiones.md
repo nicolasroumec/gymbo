@@ -21,8 +21,8 @@ Rama: `feat/workout-logging`.
 👤 Antes del cierre: anotar una sesión real en el gym.
 
 **Decidido al empezar:**
-- "Repetir" se hace desde cualquier sesión del historial; "la última de esta rutina" se suma en el incremento 6, cuando existan las rutinas.
-- Los récords se calculan en `lib/records.ts` a partir de las series del ejercicio, sin migración. La vista `personal_records` queda para el incremento 5 si hace falta.
+- "Repetir" se hace desde cualquier sesión del historial; "la última de esta rutina" se suma en el incremento 4, cuando existan las rutinas.
+- Los récords se calculan en `lib/records.ts` a partir de las series del ejercicio, sin migración. La vista `personal_records` queda para el incremento 6 si hace falta.
 - Cierre: incluye lo que quedó afuera del merge del incremento 1 (Estado "Terminado" y criterio tildado).
 - Tempo por ejercicio en la pantalla (se guarda en cada serie). Descanso fijo de 90 s hasta que existan las rutinas.
 - Quedó afuera la nota por serie (`workout_sets.notes`): pasa al incremento 8.

@@ -15,5 +15,5 @@ Rama: `feat/activities-body`.
 **Decidido en el camino:**
 - Tiempo de soga: salto = rondas × trabajo; total = salto + (rondas − 1) × descanso.
 - Sin pantalla de edición: los últimos registros se borran y se vuelven a cargar.
-- Las actividades no aparecen en Historial; se ven en las estadísticas (incremento 5).
+- Las actividades no aparecen en Historial; se ven en las estadísticas (incremento 6).
 - Se sumaron a la especificación las reglas de variantes de ejercicios y de peso de mancuernas.

@@ -13,10 +13,20 @@ export type Tempo = (typeof TEMPOS)[number]
 
 export type DraftSet = { kg: string; reps: string; done: boolean; set_type?: SetType }
 // tempo va por ejercicio (como lo anotaba el Excel) y se guarda en cada serie; superset = mismo número, se muestran juntos.
-export type DraftExercise = { exercise_id: string; sets: DraftSet[]; tempo?: Tempo | null; superset?: number | null }
+// rest_s, rep_min y rep_max vienen de la receta de la rutina (si la sesión salió de una).
+export type DraftExercise = {
+  exercise_id: string
+  sets: DraftSet[]
+  tempo?: Tempo | null
+  superset?: number | null
+  rest_s?: number | null
+  rep_min?: number | null
+  rep_max?: number | null
+}
 // workout_id se genera al empezar: guardar dos veces (reintento tras un corte) pisa la misma sesión.
 // editing = es una sesión ya guardada que se está corrigiendo desde el historial.
-export type Draft = { workout_id: string; date: string; exercises: DraftExercise[]; editing?: boolean }
+// routine_id = rutina de la que salió (null = sesión libre).
+export type Draft = { workout_id: string; date: string; exercises: DraftExercise[]; editing?: boolean; routine_id?: string | null }
 
 export const emptySet = (set_type: SetType = 'normal'): DraftSet => ({ kg: '', reps: '', done: false, set_type })
 
@@ -124,7 +134,7 @@ export function draftToRows(draft: Draft): { rows: SetRow[] } | { error: keyof T
 export type SavedSet = Omit<SetRow, 'workout_id' | 'set_type' | 'tempo'> & { set_type: string; tempo: string | null }
 
 // Sesión guardada → borrador para editarla con la misma grilla. Cada position es una tarjeta.
-export function workoutToDraft(workout_id: string, date: string, sets: SavedSet[]): Draft {
+export function workoutToDraft(workout_id: string, date: string, sets: SavedSet[], routine_id: string | null = null): Draft {
   const sorted = [...sets].sort((a, b) => a.position - b.position || a.set_number - b.set_number)
   const exercises: DraftExercise[] = []
   let lastPosition: number | null = null
@@ -135,7 +145,7 @@ export function workoutToDraft(workout_id: string, date: string, sets: SavedSet[
     }
     exercises[exercises.length - 1].sets.push({ ...setText(s), done: true, set_type: s.set_type as SetType })
   }
-  return { workout_id, date, exercises, editing: true }
+  return { workout_id, date, exercises, editing: true, routine_id }
 }
 
 // "Repetir": sesión nueva con los mismos ejercicios, tipos de serie, tempo y superseries, sin cargar.
@@ -144,6 +154,41 @@ export function repeatDraft(source: Draft, workout_id: string, date: string): Dr
   return {
     workout_id,
     date,
+    routine_id: source.routine_id ?? null,
     exercises: source.exercises.map((e) => ({ ...e, sets: e.sets.map((s) => emptySet(s.set_type)) })),
   }
+}
+
+// Una fila de routine_exercises, tal como viene de la base.
+export type RecipeEntry = {
+  exercise_id: string
+  position: number
+  target_sets: number | null
+  rep_min: number | null
+  rep_max: number | null
+  default_set_type: string
+  rest_s: number | null
+  superset_group: number | null
+}
+
+// "Hoy toca": la sesión armada desde la receta, con tantas filas como series objetivo y su tipo por defecto.
+export function draftFromRecipe(base: Draft, routine_id: string, recipe: RecipeEntry[]): Draft {
+  const exercises = [...recipe]
+    .sort((a, b) => a.position - b.position)
+    .map((r) => ({
+      exercise_id: r.exercise_id,
+      superset: r.superset_group,
+      rest_s: r.rest_s,
+      rep_min: r.rep_min,
+      rep_max: r.rep_max,
+      sets: Array.from({ length: r.target_sets ?? 1 }, () => emptySet(r.default_set_type as SetType)),
+    }))
+  return { ...base, routine_id, exercises }
+}
+
+// Objetivo de reps de la receta: "8–12", "10" o null si no tiene.
+export function repTarget(ex: DraftExercise): string | null {
+  const { rep_min: min, rep_max: max } = ex
+  if (min != null && max != null) return min === max ? String(min) : `${min}–${max}`
+  return min != null ? String(min) : max != null ? String(max) : null
 }

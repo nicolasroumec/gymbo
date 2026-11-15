@@ -494,3 +494,23 @@ h2 {
   flex: 1;
   min-width: 0;
 }
+
+/* Link con aspecto de botón secundario, dentro de una fila */
+a.button.secondary {
+  margin: 0;
+  padding: 0 16px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* "Hoy toca": tarjeta con la rutina del día y Empezar */
+.card.today {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card.today p {
+  margin: 0;
+}

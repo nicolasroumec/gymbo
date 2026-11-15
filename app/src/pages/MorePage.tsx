@@ -24,6 +24,7 @@ export default function MorePage() {
     <>
       <h1>{t.more}</h1>
       <nav className="menu">
+        <Link to="/mas/rutinas">{t.routines}</Link>
         <Link to="/mas/ejercicios">{t.exercises}</Link>
         <Link to="/mas/grupos">{t.muscleGroups}</Link>
         <Link to="/mas/actividades">{t.activityTypes}</Link>

@@ -1,6 +1,6 @@
-# Incremento 5: Estadísticas
+# Incremento 6: Estadísticas
 
-Alcance y criterios: [especificación, incremento 5](../especificacion.md#5-estadísticas).
+Alcance y criterios: [especificación, incremento 6](../especificacion.md#6-estadísticas).
 Rama: `feat/stats`.
 
 - [ ] **`feat: add strength stats calculations`**
@@ -12,4 +12,4 @@ Rama: `feat/stats`.
 - [ ] **`feat: add exercise progress and records to stats page`**
 - [ ] **`feat: add monthly table and weekly volume by group`**
 - [ ] **`feat: add rope, body weight and steps charts`**
-- [ ] **`docs: close increment 5`**
+- [ ] **`docs: close increment 6`**
