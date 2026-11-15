@@ -3,7 +3,7 @@
 Alcance y criterios: [especificación, incremento 3](../especificacion.md#3-actividades-y-cuerpo).
 Rama: `feat/activities-body`.
 
-- [ ] **`feat: add activity types page`**
+- [x] **`feat: add activity types page`**
   `ActivityTypesPage` en Más: alta, edición, archivo, campos por tipo, cargar los sugeridos.
 - [ ] **`feat: register activities by type`**
   `RegisterPage` muestra los campos del tipo elegido; tiempo total de soga calculado en `lib/` con test.

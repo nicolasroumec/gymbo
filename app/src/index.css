@@ -418,3 +418,25 @@ form.rows {
 .rest-spacer {
   height: 64px;
 }
+
+/* Grupo de checkboxes (campos de un tipo de actividad): ocupa todo el ancho de la fila */
+.fields {
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+  margin: 0;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.fields legend {
+  padding: 0 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.rows .fields input {
+  flex: none;
+}

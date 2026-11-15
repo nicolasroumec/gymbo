@@ -9,7 +9,7 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 | 0. Base | Terminado |
 | 1. Catálogo de ejercicios | Terminado |
 | 2. Registro de sesiones | Terminado |
-| 3. Actividades y cuerpo | Pendiente |
+| 3. Actividades y cuerpo | En curso |
 | 4. Importador de Excels | Pendiente |
 | 5. Estadísticas | Pendiente |
 | 6. Planes y splits | Pendiente |

@@ -114,6 +114,17 @@ const es = {
   noWorkouts: 'Todavía no hay sesiones guardadas.',
   confirmDeleteWorkout: '¿Borrar esta sesión y todas sus series? No se puede deshacer.',
   confirmReplaceDraft: 'Hay una sesión en curso sin guardar. ¿Reemplazarla por esta?',
+  activityTypes: 'Tipos de actividad',
+  newActivityType: 'Nuevo tipo de actividad',
+  loadSuggestedActivities: 'Cargar actividades sugeridas',
+  activityFields: 'Qué se anota',
+  field_minutes: 'Minutos',
+  field_km: 'Km',
+  field_rounds: 'Rondas',
+  field_work_s: 'Trabajo (s)',
+  field_rest_s: 'Descanso (s)',
+  field_jumps: 'Saltos',
+  field_best_streak: 'Mejor tanda',
 }
 
 export type Texts = typeof es
@@ -232,6 +243,17 @@ const en: Texts = {
   noWorkouts: 'No saved workouts yet.',
   confirmDeleteWorkout: 'Delete this workout and all its sets? This cannot be undone.',
   confirmReplaceDraft: 'There is an unsaved workout in progress. Replace it with this one?',
+  activityTypes: 'Activity types',
+  newActivityType: 'New activity type',
+  loadSuggestedActivities: 'Load suggested activities',
+  activityFields: 'What gets logged',
+  field_minutes: 'Minutes',
+  field_km: 'Km',
+  field_rounds: 'Rounds',
+  field_work_s: 'Work (s)',
+  field_rest_s: 'Rest (s)',
+  field_jumps: 'Jumps',
+  field_best_streak: 'Best streak',
 }
 
 export type Lang = 'es' | 'en'
