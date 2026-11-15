@@ -8,7 +8,7 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 | --- | --- |
 | 0. Base | Terminado |
 | 1. Catálogo de ejercicios | En curso |
-| 2. Registro de sesiones | Pendiente |
+| 2. Registro de sesiones | En curso |
 | 3. Actividades y cuerpo | Pendiente |
 | 4. Importador de Excels | Pendiente |
 | 5. Estadísticas | Pendiente |
@@ -78,7 +78,7 @@ Diez tablas y una vista. La unidad mínima es la **serie**: una fila por serie, 
 | `activities` | date, activity_type_id, minutes, km, rounds, work_s, rest_s, jumps, best_streak, notes | Todos los campos opcionales; la pantalla muestra solo los `fields` del tipo. Soga: `rounds` × (`work_s` + `rest_s`). Borrar un tipo con actividades está bloqueado (`on delete restrict`) |
 | `body_weights` | date, kg | Pesajes |
 | `daily_steps` | date, steps | Único por usuario y fecha |
-| `personal_records` | vista | Desde `workout_sets`: mejor peso, mejor 1RM estimado y más reps por ejercicio |
+| `personal_records` | vista (pendiente) | Desde `workout_sets`: mejor peso, mejor 1RM estimado y más reps por ejercicio. Hasta el incremento 5 los récords se calculan en `lib/records.ts` |
 
 **Reglas comunes:**
 
@@ -185,7 +185,7 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - `lib/records.ts`: dada una serie y los récords actuales, dice si es récord (peso, 1RM estimado o reps con ese peso); ignora calentamiento. Test.
 - `lib/draft.ts`: guardar y recuperar la sesión en curso en localStorage; se borra solo cuando Supabase confirma el guardado. Test.
 - `WorkoutPage`: grilla de la **Pantalla de carga**, selector de ejercicio con búsqueda, tipo de serie, tempo, superserie, temporizador de descanso, aviso 🏆, nota fija del ejercicio.
-- "Repetir la última sesión de esta rutina".
+- "Repetir" una sesión pasada desde el historial (la última de una rutina llega con el incremento 6).
 - `HistoryPage` y detalle de sesión: lista por fecha, editar y borrar.
 - [ ] Se anota una sesión real en el gym desde el celular sin usar el Excel.
 
