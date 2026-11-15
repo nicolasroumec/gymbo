@@ -2,7 +2,10 @@ import { Fragment, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useI18n, type Texts } from '../lib/i18n'
 import { filterExercises } from '../lib/exercises'
-import { draftToRows, emptySet, loadDraft, pastValues, saveDraft, toggleDone, type Draft, type DraftSet } from '../lib/draft'
+import {
+  draftToRows, emptySet, groupSupersets, loadDraft, nextSetType, pastValues, saveDraft, TEMPOS, toggleDone,
+  type Draft, type DraftExercise, type DraftSet, type SetType, type Tempo,
+} from '../lib/draft'
 import { previousSets, type PastSet } from '../lib/previous'
 import type { Tables } from '../lib/database.types'
 
@@ -60,13 +63,17 @@ export default function WorkoutPage() {
     const rows = await fetchPast(id, draft.workout_id)
     if (!rows) setMessage('loadError')
     setPast((p) => [...p, ...(rows ?? [])])
-    // Arranca con tantas filas como series hizo la vez anterior.
-    const count = previousSets(rows ?? [], null).get(id)?.length || 1
-    setDraft((d) => ({ ...d, exercises: [...d.exercises, { exercise_id: id, sets: Array.from({ length: count }, emptySet) }] }))
+    // Arranca con las filas de la vez anterior y sus tipos (el calentamiento vuelve a ser C). set_type viene validado por la base.
+    const prevSets = previousSets(rows ?? [], null).get(id) ?? []
+    const sets = prevSets.length ? prevSets.map((p) => emptySet(p.set_type as SetType)) : [emptySet()]
+    setDraft((d) => ({ ...d, exercises: [...d.exercises, { exercise_id: id, sets }] }))
   }
 
-  function setSets(index: number, sets: DraftSet[]) {
-    setDraft((d) => ({ ...d, exercises: d.exercises.map((e, i) => (i === index ? { ...e, sets } : e)) }))
+  function updateExercise(index: number, patch: Partial<DraftExercise>) {
+    setDraft((d) => {
+      const exercises = d.exercises.map((e, i) => (i === index ? { ...e, ...patch } : e))
+      return { ...d, exercises: 'superset' in patch ? groupSupersets(exercises) : exercises }
+    })
   }
 
   function removeExercise(index: number) {
@@ -117,9 +124,22 @@ export default function WorkoutPage() {
         const info = catalog.find((c) => c.id === ex.exercise_id)
         const prev = previous.get(ex.exercise_id) ?? []
         return (
-          <section key={ex.exercise_id} className="card">
+          <section key={ex.exercise_id} className={ex.superset ? 'card superset' : 'card'}>
+            {ex.superset && <p className="tag">{t.superset} {ex.superset}</p>}
             <h2>{info?.name}</h2>
             {info?.notes && <p className="muted">{info.notes}</p>}
+            <div className="actions compact">
+              <select aria-label={t.tempo} value={ex.tempo ?? ''}
+                onChange={(e) => updateExercise(i, { tempo: (e.target.value || null) as Tempo | null })}>
+                <option value="">{t.noTempo}</option>
+                {TEMPOS.map((tempo) => <option key={tempo} value={tempo}>{t[`tempo_${tempo}`]}</option>)}
+              </select>
+              <select aria-label={t.superset} value={ex.superset ?? ''}
+                onChange={(e) => updateExercise(i, { superset: e.target.value ? Number(e.target.value) : null })}>
+                <option value="">{t.noSuperset}</option>
+                {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{t.superset} {n}</option>)}
+              </select>
+            </div>
             <div className="grid">
               <span>{t.setNumber}</span>
               <span>{t.previous}</span>
@@ -129,10 +149,14 @@ export default function WorkoutPage() {
               {ex.sets.map((s, j) => {
                 const p = prev.find((x) => x.set_number === j + 1)
                 const pv = pastValues(p)
-                const update = (next: DraftSet) => setSets(i, ex.sets.map((x, k) => (k === j ? next : x)))
+                const update = (next: DraftSet) => updateExercise(i, { sets: ex.sets.map((x, k) => (k === j ? next : x)) })
+                const type = s.set_type ?? 'normal'
                 return (
                   <Fragment key={j}>
-                    <span>{j + 1}</span>
+                    <button type="button" className={`set-type ${type}`} aria-label={`${t.setNumber} ${j + 1}: ${t[`setType_${type}`]}`}
+                      onClick={() => update({ ...s, set_type: nextSetType(type) })}>
+                      {type === 'normal' ? j + 1 : t[`setShort_${type}`]}
+                    </button>
                     <span className="muted">{!p ? '–' : pv.kg ? `${pv.kg} × ${pv.reps}` : pv.reps}</span>
                     <input inputMode="decimal" aria-label={`${t.kg} ${j + 1}`} placeholder={pv.kg} value={s.kg}
                       onChange={(e) => update({ ...s, kg: e.target.value })} />
@@ -145,7 +169,7 @@ export default function WorkoutPage() {
               })}
             </div>
             <div className="actions">
-              <button className="secondary" onClick={() => setSets(i, [...ex.sets, emptySet()])}>{t.addSet}</button>
+              <button className="secondary" onClick={() => updateExercise(i, { sets: [...ex.sets, emptySet()] })}>{t.addSet}</button>
               <button className="secondary" onClick={() => removeExercise(i)}>{t.removeExercise}</button>
             </div>
           </section>
