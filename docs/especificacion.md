@@ -10,9 +10,9 @@ Fuente de verdad del proyecto para personas y agentes. Si el código y este docu
 | 1. Catálogo de ejercicios | Terminado |
 | 2. Registro de sesiones | Terminado |
 | 3. Actividades y cuerpo | Terminado (falta la semana de prueba) |
-| 4. Importador de Excels | Pendiente |
-| 5. Estadísticas | Pendiente |
-| 6. Planes y splits | Pendiente |
+| 4. Planes y splits | Pendiente |
+| 5. Importador de Excels | Pendiente |
+| 6. Estadísticas | Pendiente |
 | 7. Progresión | Pendiente |
 | 8. PWA y pulido | Pendiente |
 
@@ -78,7 +78,7 @@ Diez tablas y una vista. La unidad mínima es la **serie**: una fila por serie, 
 | `activities` | date, activity_type_id, minutes, km, rounds, work_s, rest_s, jumps, best_streak, notes | Todos los campos opcionales; la pantalla muestra solo los `fields` del tipo. Soga: tiempo de salto = `rounds` × `work_s`; total = salto + (`rounds` − 1) × `rest_s` (después de la última ronda no hay descanso). Borrar un tipo con actividades está bloqueado (`on delete restrict`) |
 | `body_weights` | date, kg | Pesajes |
 | `daily_steps` | date, steps | Único por usuario y fecha |
-| `personal_records` | vista (pendiente) | Desde `workout_sets`: mejor peso, mejor 1RM estimado y más reps por ejercicio. Hasta el incremento 5 los récords se calculan en `lib/records.ts` |
+| `personal_records` | vista (pendiente) | Desde `workout_sets`: mejor peso, mejor 1RM estimado y más reps por ejercicio. Hasta el incremento 6 los récords se calculan en `lib/records.ts` |
 
 **Reglas comunes:**
 
@@ -129,6 +129,8 @@ Ida y vuelta obligatoria: `format(parse(x))` devuelve la forma canónica de `x` 
 ## Plan de incrementos
 
 Cada incremento termina publicado y usable desde el celular. Se trabaja uno a la vez (`/incremento N`): al empezar se revisa este plan y se ajusta. Al cerrar uno: tildar sus criterios y actualizar la tabla **Estado**.
+
+**Orden:** después del incremento 3 se adelantó Planes y splits (ahora 4), porque no depende del historial y se usa en el gym desde el primer día. El importador (5) va justo antes de Estadísticas (6) y Progresión (7), que necesitan historial para tener sentido.
 
 **Commits:** cada incremento tiene su plan de commits en `docs/incrementos/N-*.md`, en una rama propia que se mergea a `main` al cerrar. Cada commit deja `npm run check` en verde y la app funcionando. El orden va de lógica pura con tests a pantallas, y termina con `docs: close increment N`.
 
@@ -187,7 +189,7 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - `lib/records.ts`: dada una serie y los récords actuales, dice si es récord (peso, 1RM estimado o reps con ese peso); ignora calentamiento. Test.
 - `lib/draft.ts`: guardar y recuperar la sesión en curso en localStorage; se borra solo cuando Supabase confirma el guardado. Test.
 - `WorkoutPage`: grilla de la **Pantalla de carga**, selector de ejercicio con búsqueda, tipo de serie, tempo, superserie, temporizador de descanso, aviso 🏆, nota fija del ejercicio.
-- "Repetir" una sesión pasada desde el historial (la última de una rutina llega con el incremento 6).
+- "Repetir" una sesión pasada desde el historial (la última de una rutina llega con el incremento 4).
 - `HistoryPage` y detalle de sesión: lista por fecha, editar y borrar.
 - [x] Se anota una sesión real en el gym desde el celular sin usar el Excel.
 
@@ -198,7 +200,13 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - Una sola fecha arriba vale para actividad, peso y pasos. Debajo de cada formulario, los últimos registros con borrar (editar = borrar y volver a cargar). Pasos: uno por día; cargar de nuevo la misma fecha lo reemplaza.
 - [ ] Una semana completa (gym, fútbol, soga, peso) registrada solo en la app.
 
-### 4. Importador de Excels
+### 4. Planes y splits
+- `RoutinesPage` y `RoutineFormPage`: rutinas con receta (ejercicios en orden, series objetivo, rango de reps, tipo por defecto, descanso, superseries); reordenar el ciclo.
+- `lib/cycle.ts`: qué rutina toca hoy según la última sesión hecha y el orden del ciclo. Test.
+- Pestaña Entrenar = "Hoy toca": arma la sesión desde la receta, con la columna Anterior.
+- [ ] Al abrir la app en el gym, la sesión del día ya está armada.
+
+### 5. Importador de Excels
 - Lee el formato de los Excels del autor (ver **Importador de Excels**); para otros usuarios queda documentado en el README, no se generaliza.
 - Dependencia nueva: SheetJS (`xlsx`), ya prevista en el stack.
 - `lib/import/`: un lector por origen de la tabla **Importador de Excels** (fuerza, bici fija, calendario, pasos, peso, lista de ejercicios) que devuelve filas listas para insertar, sin tocar la base. Tests con celdas de ejemplo escritas en el test (los .xlsx reales no se commitean).
@@ -206,17 +214,11 @@ Pantallas en `app/src/pages/`, lógica pura en `app/src/lib/` con su `*.test.ts`
 - `ImportPage`: subir archivo, vista previa con conteos por mes y avisos (fechas fuera de mes, nombres a unificar), confirmar y guardar. Crea los tipos de actividad y ejercicios que falten. Reimportar no duplica.
 - [ ] Datos de 2025 y 2026 importados; totales por mes iguales a la hoja "Total" (tolerancia ±1 sesión por mes).
 
-### 5. Estadísticas
+### 6. Estadísticas
 - `lib/stats.ts`: 1RM Epley, volumen, peso máximo por sesión, series semanales por grupo muscular, frecuencia mensual por tipo. Tests.
 - `components/LineChart.tsx` y `components/BarChart.tsx` en SVG propio.
 - `StatsPage`: progreso por ejercicio (elegís ejercicio y período), récords, tabla mensual, volumen semanal por grupo, soga, peso corporal y pasos.
 - [ ] "¿Mejoré en press plano este año?" se responde en dos toques.
-
-### 6. Planes y splits
-- `RoutinesPage` y `RoutineFormPage`: rutinas con receta (ejercicios en orden, series objetivo, rango de reps, tipo por defecto, descanso, superseries); reordenar el ciclo.
-- `lib/cycle.ts`: qué rutina toca hoy según la última sesión hecha y el orden del ciclo. Test.
-- Pestaña Entrenar = "Hoy toca": arma la sesión desde la receta, con la columna Anterior.
-- [ ] Al abrir la app en el gym, la sesión del día ya está armada.
 
 ### 7. Progresión
 - `lib/progression.ts`: progresión doble (ver **Estadísticas y progresión**), con `weight_step` del ejercicio o el del equipo. Tests por cada regla.

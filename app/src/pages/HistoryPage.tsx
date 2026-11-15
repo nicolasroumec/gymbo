@@ -13,7 +13,7 @@ export default function HistoryPage() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    // ponytail: últimas 100 sesiones; paginar si el historial importado (incremento 4) lo pide.
+    // ponytail: últimas 100 sesiones; paginar si el historial importado (incremento 5) lo pide.
     supabase
       .from('workouts')
       .select('id, date, workout_sets(position, exercises(name))')

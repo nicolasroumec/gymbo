@@ -13,7 +13,7 @@ import { format, parse } from '../lib/sets'
 import { formatTimestamp } from '../lib/video'
 import type { Tables } from '../lib/database.types'
 
-// Sin receta todavía: el descanso por ejercicio (routine_exercises.rest_s) llega con las rutinas, en el incremento 6.
+// Sin receta todavía: el descanso por ejercicio (routine_exercises.rest_s) llega con las rutinas, en el incremento 4.
 const REST_S = 90
 
 const newDraft = (): Draft => ({

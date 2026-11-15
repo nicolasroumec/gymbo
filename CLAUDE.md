@@ -8,7 +8,7 @@ App personal de entrenamiento (un solo usuario): fuerza, actividades, soga, peso
 
 - `app/`: frontend Vite. Los comandos `npm` se corren desde acá.
 - `supabase/`: migraciones y config del CLI. Los comandos `npx supabase` se corren desde la raíz.
-- `docs/*.xlsx`: historial viejo del usuario. Solo lectura, datos personales (no se commitean), sirven de fixtures del importador (incremento 4).
+- `docs/*.xlsx`: historial viejo del usuario. Solo lectura, datos personales (no se commitean), sirven de fixtures del importador (incremento 5).
 
 ## Comandos
 

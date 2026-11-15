@@ -1,6 +1,6 @@
-# Incremento 6: Planes y splits
+# Incremento 4: Planes y splits
 
-Alcance y criterios: [especificación, incremento 6](../especificacion.md#6-planes-y-splits).
+Alcance y criterios: [especificación, incremento 4](../especificacion.md#4-planes-y-splits).
 Rama: `feat/routines`.
 
 - [ ] **`feat: add routines page with cycle order`**
@@ -11,4 +11,4 @@ Rama: `feat/routines`.
   `lib/cycle.ts` y test.
 - [ ] **`feat: build today's workout from routine`**
   Pestaña Entrenar = "Hoy toca", con la columna Anterior.
-- [ ] **`docs: close increment 6`**
+- [ ] **`docs: close increment 4`**
