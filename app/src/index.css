@@ -377,3 +377,16 @@ form.rows {
   color: var(--accent);
   border-color: var(--accent);
 }
+
+/* Atajo de notación: campo de texto + Aplicar en una línea */
+.notation {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.notation input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+}

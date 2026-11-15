@@ -1,6 +1,7 @@
 import type { Texts } from './i18n'
 import { parseDecimal } from './numbers'
 import type { PastSet } from './previous'
+import type { NotationSet } from './sets'
 import { readPref, writePref } from './storage'
 
 // La sesión en curso tal cual se ve en pantalla: los campos son texto, como los escribió el usuario.
@@ -47,19 +48,38 @@ export function parseDraft(json: string | null): Draft | null {
 export const loadDraft = () => parseDraft(readPref('draft'))
 export const saveDraft = (draft: Draft) => writePref('draft', JSON.stringify(draft))
 
-// Una serie anterior como texto de los campos: kg con coma, reps o "35s" si fue por tiempo.
-export function pastValues(p: PastSet | undefined): { kg: string; reps: string } {
-  if (!p) return { kg: '', reps: '' }
+// Una serie como texto de los campos: kg con coma, reps o "35s" si fue por tiempo.
+export function setText(s: NotationSet | undefined): { kg: string; reps: string } {
+  if (!s) return { kg: '', reps: '' }
   return {
-    kg: p.weight_kg == null ? '' : String(p.weight_kg).replace('.', ','),
-    reps: p.seconds != null ? `${p.seconds}s` : String(p.reps ?? ''),
+    kg: s.weight_kg == null ? '' : String(s.weight_kg).replace('.', ','),
+    reps: s.seconds != null ? `${s.seconds}s` : String(s.reps ?? ''),
   }
+}
+
+// Lee los campos de una fila: reps entero o "35s", kg opcional con coma o punto. Inválido = null.
+export function readSet(s: DraftSet): NotationSet | null {
+  const amount = /^(\d+)(s?)$/i.exec(s.reps.trim())
+  const kg = s.kg.trim() ? parseDecimal(s.kg) : null
+  if (!amount || (s.kg.trim() && kg === null)) return null
+  const n = Number(amount[1])
+  return { reps: amount[2] ? null : n, seconds: amount[2] ? n : null, weight_kg: kg }
+}
+
+// Atajo de notación: las series escritas reemplazan la grilla, tildadas. Cada fila conserva su tipo.
+export function setsFromNotation(current: DraftSet[], parsed: NotationSet[]): DraftSet[] {
+  return parsed.map((p, i) => ({ ...setText(p), done: true, set_type: current[i]?.set_type ?? 'normal' }))
+}
+
+// La grilla como notación (para verla como texto): solo las filas con datos válidos.
+export function setsToNotation(sets: DraftSet[]): NotationSet[] {
+  return sets.map(readSet).filter((s) => s !== null)
 }
 
 // Tildar ✓ copia lo de la vez anterior en los campos vacíos; destildar no borra nada.
 export function toggleDone(set: DraftSet, prev: PastSet | undefined): DraftSet {
   if (set.done) return { ...set, done: false }
-  const p = pastValues(prev)
+  const p = setText(prev)
   return { ...set, kg: set.kg.trim() || p.kg, reps: set.reps.trim() || p.reps, done: true }
 }
 
@@ -82,18 +102,14 @@ export function draftToRows(draft: Draft): { rows: SetRow[] } | { error: keyof T
   for (const [position, ex] of draft.exercises.entries()) {
     let setNumber = 0
     for (const s of ex.sets.filter((x) => x.done)) {
-      const amount = /^(\d+)(s?)$/i.exec(s.reps.trim())
-      const kg = s.kg.trim() ? parseDecimal(s.kg) : null
-      if (!amount || (s.kg.trim() && kg === null)) return { error: 'invalidSet' }
-      const n = Number(amount[1])
+      const values = readSet(s)
+      if (!values) return { error: 'invalidSet' }
       rows.push({
+        ...values,
         workout_id: draft.workout_id,
         exercise_id: ex.exercise_id,
         position,
         set_number: ++setNumber,
-        reps: amount[2] ? null : n,
-        seconds: amount[2] ? n : null,
-        weight_kg: kg,
         set_type: s.set_type ?? 'normal',
         tempo: ex.tempo ?? null,
         superset_group: ex.superset ?? null,

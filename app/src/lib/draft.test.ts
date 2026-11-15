@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { draftToRows, groupSupersets, nextSetType, parseDraft, toggleDone, type Draft, type DraftExercise, type DraftSet } from './draft'
+import {
+  draftToRows, groupSupersets, nextSetType, parseDraft, setsFromNotation, setsToNotation, toggleDone, type Draft, type DraftExercise, type DraftSet,
+} from './draft'
+import { format, parse } from './sets'
 import type { PastSet } from './previous'
 
 // Datos inventados.
@@ -99,5 +102,21 @@ describe('groupSupersets', () => {
 
   it('sin superseries no cambia el orden', () => {
     expect(ids(groupSupersets([ex('a'), ex('b'), ex('c')]))).toEqual(['a', 'b', 'c'])
+  })
+})
+
+describe('atajo de notación', () => {
+  it('rellena la grilla tildada y conserva el tipo de cada fila', () => {
+    const current = [{ ...set('', '', false), set_type: 'warmup' as const }, set('', '', false)]
+    expect(setsFromNotation(current, parse('12 x 10 8-6 x 22,5 40s')!)).toEqual([
+      { kg: '10', reps: '12', done: true, set_type: 'warmup' },
+      { kg: '22,5', reps: '8', done: true, set_type: 'normal' },
+      { kg: '22,5', reps: '6', done: true, set_type: 'normal' },
+      { kg: '', reps: '40s', done: true, set_type: 'normal' },
+    ])
+  })
+
+  it('la grilla se ve como texto, salteando filas vacías o inválidas', () => {
+    expect(format(setsToNotation([set('20', '8'), set('20', '6', false), set('', ''), set('abc', '5'), set('25', '4')]))).toBe('8-6 x 20 4 x 25')
   })
 })

@@ -100,6 +100,10 @@ const es = {
   tempo_pause: 'Con pausa',
   superset: 'Superserie',
   noSuperset: 'Sin superserie',
+  notation: 'Series como texto',
+  notationExample: 'Ej.: 8-6-4 x 20',
+  apply: 'Aplicar',
+  invalidNotation: 'No entendí las series. Ejemplos: 8-6-4 x 20, 10 x 32 7 x 37, 35s-30s.',
 }
 
 export type Texts = typeof es
@@ -204,6 +208,10 @@ const en: Texts = {
   tempo_pause: 'Paused',
   superset: 'Superset',
   noSuperset: 'No superset',
+  notation: 'Sets as text',
+  notationExample: 'E.g. 8-6-4 x 20',
+  apply: 'Apply',
+  invalidNotation: 'Could not read the sets. Examples: 8-6-4 x 20, 10 x 32 7 x 37, 35s-30s.',
 }
 
 export type Lang = 'es' | 'en'

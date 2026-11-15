@@ -3,10 +3,12 @@ import { supabase } from '../lib/supabase'
 import { useI18n, type Texts } from '../lib/i18n'
 import { filterExercises } from '../lib/exercises'
 import {
-  draftToRows, emptySet, groupSupersets, loadDraft, nextSetType, pastValues, saveDraft, TEMPOS, toggleDone,
+  draftToRows, emptySet, groupSupersets, loadDraft, nextSetType, saveDraft, setsFromNotation, setsToNotation, setText,
+  TEMPOS, toggleDone,
   type Draft, type DraftExercise, type DraftSet, type SetType, type Tempo,
 } from '../lib/draft'
 import { previousSets, type PastSet } from '../lib/previous'
+import { format, parse } from '../lib/sets'
 import type { Tables } from '../lib/database.types'
 
 const newDraft = (): Draft => ({
@@ -74,6 +76,15 @@ export default function WorkoutPage() {
       const exercises = d.exercises.map((e, i) => (i === index ? { ...e, ...patch } : e))
       return { ...d, exercises: 'superset' in patch ? groupSupersets(exercises) : exercises }
     })
+  }
+
+  // Atajo: "8-6-4 x 20" reemplaza la grilla del ejercicio.
+  function applyNotation(index: number, form: HTMLFormElement) {
+    const parsed = parse(String(new FormData(form).get('notation') ?? ''))
+    if (!parsed || parsed.length === 0) return setMessage('invalidNotation')
+    updateExercise(index, { sets: setsFromNotation(draft.exercises[index].sets, parsed) })
+    setMessage(null)
+    form.reset()
   }
 
   function removeExercise(index: number) {
@@ -148,7 +159,7 @@ export default function WorkoutPage() {
               <span aria-hidden="true">✓</span>
               {ex.sets.map((s, j) => {
                 const p = prev.find((x) => x.set_number === j + 1)
-                const pv = pastValues(p)
+                const pv = setText(p)
                 const update = (next: DraftSet) => updateExercise(i, { sets: ex.sets.map((x, k) => (k === j ? next : x)) })
                 const type = s.set_type ?? 'normal'
                 return (
@@ -168,6 +179,11 @@ export default function WorkoutPage() {
                 )
               })}
             </div>
+            <form className="notation" onSubmit={(e) => { e.preventDefault(); applyNotation(i, e.currentTarget) }}>
+              <input name="notation" autoComplete="off" aria-label={t.notation}
+                placeholder={format(setsToNotation(ex.sets)) || t.notationExample} />
+              <button type="submit" className="secondary">{t.apply}</button>
+            </form>
             <div className="actions">
               <button className="secondary" onClick={() => updateExercise(i, { sets: [...ex.sets, emptySet()] })}>{t.addSet}</button>
               <button className="secondary" onClick={() => removeExercise(i)}>{t.removeExercise}</button>
