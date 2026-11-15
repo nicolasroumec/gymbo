@@ -137,6 +137,12 @@ const es = {
   steps: 'Pasos',
   invalidWeight: 'El peso tiene que ser un número mayor a 0.',
   invalidSteps: 'Los pasos van como número entero.',
+  routines: 'Rutinas',
+  newRoutine: 'Nueva rutina',
+  routinesHint: 'El orden de la lista es el orden del ciclo. Las archivadas no entran en el ciclo.',
+  moveUp: 'Subir',
+  moveDown: 'Bajar',
+  confirmDeleteRoutine: '¿Borrar esta rutina y su receta? Las sesiones ya hechas se conservan.',
   confirmDeleteEntry: '¿Borrar este registro? No se puede deshacer.',
 }
 
@@ -279,6 +285,12 @@ const en: Texts = {
   steps: 'Steps',
   invalidWeight: 'Weight must be a number greater than 0.',
   invalidSteps: 'Steps must be a whole number.',
+  routines: 'Routines',
+  newRoutine: 'New routine',
+  routinesHint: 'The list order is the cycle order. Archived routines are left out of the cycle.',
+  moveUp: 'Move up',
+  moveDown: 'Move down',
+  confirmDeleteRoutine: 'Delete this routine and its recipe? Past workouts are kept.',
   confirmDeleteEntry: 'Delete this entry? This cannot be undone.',
 }
 

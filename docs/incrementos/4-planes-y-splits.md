@@ -3,7 +3,7 @@
 Alcance y criterios: [especificación, incremento 4](../especificacion.md#4-planes-y-splits).
 Rama: `feat/routines`.
 
-- [ ] **`feat: add routines page with cycle order`**
+- [x] **`feat: add routines page with cycle order`**
   `RoutinesPage`: lista, alta, archivo, reordenar el ciclo.
 - [ ] **`feat: add routine recipe form`**
   `RoutineFormPage`: ejercicios en orden, series objetivo, rango de reps, tipo por defecto, descanso, superseries.
